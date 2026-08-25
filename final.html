@@ -6508,7 +6508,8 @@
             const globalDiscountAmount = parseFloat(document.getElementById('discountAmount').value) || 0;
             
             // Tax Settings
-            const gstEnabled = settings.gstEnabled;
+            const settings = JSON.parse(localStorage.getItem('settings') || 'null') || getDefaultSettings();
+            const gstEnabled = settings.gstEnabled === true;
             const businessState = settings.businessState || '';
             const customerStateEl = document.getElementById('customerState');
             const customerState = customerStateEl ? customerStateEl.value : '';
@@ -6942,6 +6943,7 @@
             const customerAddress = document.getElementById('customerAddress') ? document.getElementById('customerAddress').value : '';
             const customerStateEl = document.getElementById('customerState');
             const customerState = customerStateEl ? customerStateEl.value : '';
+            const settings = JSON.parse(localStorage.getItem('settings') || 'null') || getDefaultSettings();
             const taxTypeEl = document.getElementById('saleTaxType');
             let taxTypeInput = taxTypeEl ? taxTypeEl.value : (settings.defaultTaxType || 'auto');
             
