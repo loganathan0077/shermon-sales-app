@@ -1,6 +1,6 @@
-# Deploying Doodles Store to Firebase Hosting
+# Deploying Sales App to Firebase Hosting
 
-This guide will help you deploy your Doodles Store SalesApp to the cloud using Firebase Hosting, making it accessible from anywhere via a URL.
+This guide will help you deploy your Sales App SalesApp to the cloud using Firebase Hosting, making it accessible from anywhere via a URL.
 
 ## Why Firebase Hosting?
 
@@ -57,7 +57,7 @@ firebase init hosting
 You'll be asked several questions:
 
 1. **"Please select an option:"** → Choose **"Use an existing project"**
-2. **"Select a default Firebase project:"** → Choose **"doodles-store"**
+2. **"Select a default Firebase project:"** → Choose **"sales-app"**
 3. **"What do you want to use as your public directory?"** → Press Enter (use default: `public`)
 4. **"Configure as a single-page app?"** → Type **"N"** (No)
 5. **"Set up automatic builds and deploys with GitHub?"** → Type **"N"** (No)
@@ -87,15 +87,15 @@ Wait for the deployment to complete. You'll see output like:
 ```
 ✔  Deploy complete!
 
-Project Console: https://console.firebase.google.com/project/doodles-store/overview
-Hosting URL: https://doodles-store.web.app
+Project Console: https://console.firebase.google.com/project/sales-app/overview
+Hosting URL: https://sales-app.web.app
 ```
 
 ### Step 6: Access Your App
 
 Your app is now live! You can access it at:
-- **Primary URL:** `https://doodles-store.web.app`
-- **Alternative URL:** `https://doodles-store.firebaseapp.com`
+- **Primary URL:** `https://sales-app.web.app`
+- **Alternative URL:** `https://sales-app.firebaseapp.com`
 
 ## Quick Deployment Commands
 
@@ -223,4 +223,4 @@ This is more than enough for a small internal app. If you exceed limits, you'll 
 4. ✅ Test login from the deployed URL
 5. ✅ Bookmark the URL for easy access
 
-Your Doodles Store is now accessible from anywhere! 🎨🚀
+Your Sales App is now accessible from anywhere! 🎨🚀

@@ -17,11 +17,13 @@ export function updateSyncStatus(status, message) {
 }
 
 export async function login(email, password, force = false) {
-    if (email === "admin@doodlesstore.in" && password === "Doodles@2026") {
+    const settings = JSON.parse(localStorage.getItem('settings') || 'null') || { adminPassword: "Admin@2026" };
+    const configuredAdminPassword = settings.adminPassword || "Admin@2026";
+    if (email === "admin@example.com" && password === configuredAdminPassword) {
         sessionStorage.setItem('offline_user', email);
         return { success: true, user: { email: email, uid: "offline_admin" } };
     }
-    if (email === "user@doodlesstore.in" && password === "Doodles@123") {
+    if (email === "user@example.com" && password === "User@123") {
         sessionStorage.setItem('offline_user', email);
         return { success: true, user: { email: email, uid: "offline_user" } };
     }
@@ -145,7 +147,7 @@ export function autoSync() {}
 
 export async function isAdmin() {
     const userEmail = sessionStorage.getItem('offline_user');
-    return userEmail === "admin@doodlesstore.in";
+    return userEmail === "admin@example.com";
 }
 
 export async function verifyAdmin(actionName) {

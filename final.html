@@ -7,9 +7,9 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Doodles Store">
+    <meta name="apple-mobile-web-app-title" content="Sales App">
     <meta name="theme-color" content="#f12711">
-    <meta name="description" content="Inventory & Sales Management System for Doodles Stationery Store">
+    <meta name="description" content="Inventory & Sales Management System for salesapp Stationery Store">
 
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json">
@@ -19,7 +19,7 @@
     <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png">
     <link rel="apple-touch-icon" href="/icon-192.png">
 
-    <title>Doodles Store - Inventory & Sales</title>
+    <title>Business Management System</title>
     <!-- Include Html5-QRCode library for barcode scanning -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
@@ -45,7 +45,7 @@
                 // Override localStorage
                 const originalSetItem = localStorage.setItem;
                 const originalGetItem = localStorage.getItem;
-                const trackedKeys = ['products', 'sales', 'stockHistory', 'purchaseOrders', 'purchases', 'calculatorHistory', 'dayClosings', 'negativeChangeCount', 'draftSales'];
+                const trackedKeys = ['products', 'sales', 'stockHistory', 'purchaseOrders', 'purchases', 'calculatorHistory', 'dayClosings', 'negativeChangeCount', 'draftSales', 'settings'];
 
                 localStorage.getItem = function(key) {
                     const f = originalGetItem.call(localStorage, 'database_folder');
@@ -1259,6 +1259,47 @@
             background-color: #0d6efd;
             color: white;
         }
+
+        /* Modern Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        .toggle-switch input:checked + .toggle-slider {
+            background-color: #2196F3;
+        }
+        .toggle-switch input:checked + .toggle-slider:before {
+            transform: translateX(20px);
+        }
     </style>
 </head>
 
@@ -1266,9 +1307,12 @@
     <div class="container">
         <div class="header">
             <div class="responsive-header" style="display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                    <h1>Doodles Store</h1>
-                    <p>Inventory & Sales System</p>
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <img id="headerLogo" src="" style="max-height: 50px; display: none; border-radius: 4px;">
+                    <div>
+                        <h1 id="headerTitle" style="margin-bottom: 2px;">Business Management</h1>
+                        <p id="headerTagline" style="margin: 0; opacity: 0.9;">Inventory & Sales System</p>
+                    </div>
                 </div>
                 <div style="text-align: right; width: 100%; display: flex; flex-direction: column; align-items: flex-end;"
                     class="header-actions">
@@ -1295,6 +1339,7 @@
             <button class="nav-tab" data-tab="products" onclick="switchTab('products', this)">🏷️ Products</button>
             <button class="nav-tab" data-tab="calculator" onclick="switchTab('calculator', this)">🧮 Calculator</button>
             <button class="nav-tab" data-tab="denomination" onclick="switchTab('denomination', this)">💵 Cash Denomination</button>
+            <button class="nav-tab" data-tab="settings" onclick="switchTab('settings', this)">⚙️ Settings</button>
         </div>
 
         <div class="content">
@@ -1515,6 +1560,22 @@
                             <input type="number" id="courierCharges" min="0" step="0.01" value="0"
                                 onchange="updateDiscount()" placeholder="Courier charges" onfocus="this.select()" onkeydown="if(event.key==='Enter'){event.preventDefault(); document.getElementById('customerName').focus();}">
                         </div>
+                        <div class="form-group gst-field" style="display:none;">
+                            <label>Taxable Amount (₹)</label>
+                            <input type="number" id="cartTaxableAmount" step="0.01" readonly style="font-weight: bold;">
+                        </div>
+                        <div class="form-group" id="summary-cgst" style="display:none;">
+                            <label>CGST (₹)</label>
+                            <input type="number" id="cartCGST" step="0.01" readonly style="font-weight: bold;">
+                        </div>
+                        <div class="form-group" id="summary-sgst" style="display:none;">
+                            <label>SGST (₹)</label>
+                            <input type="number" id="cartSGST" step="0.01" readonly style="font-weight: bold;">
+                        </div>
+                        <div class="form-group" id="summary-igst" style="display:none;">
+                            <label>IGST (₹)</label>
+                            <input type="number" id="cartIGST" step="0.01" readonly style="font-weight: bold;">
+                        </div>
                         <div class="form-group">
                             <label>Total Amount (₹)</label>
                             <input type="number" id="cartTotal" step="0.01" readonly
@@ -1523,6 +1584,64 @@
                         <div class="form-group">
                             <label>Customer Name</label>
                             <input type="text" id="customerName" placeholder="Optional" onfocus="this.select()" onkeydown="if(event.key==='Enter'){event.preventDefault(); document.getElementById('paymentMethodSearch').focus();}">
+                        </div>
+                        <div class="form-group gst-field" style="display:none;">
+                            <label>Customer GSTIN / GST No</label>
+                            <input type="text" id="customerGSTIN" placeholder="Optional">
+                        </div>
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label>Customer Address</label>
+                            <input type="text" id="customerAddress" placeholder="Optional">
+                        </div>
+                        <div class="form-group gst-field" style="display:none;">
+                            <label>Customer State</label>
+                            <select id="customerState" class="form-control" onchange="updateCartDisplay()">
+                                <option value="">Select State...</option>
+                                <option value="Andhra Pradesh">Andhra Pradesh</option>
+                                <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+                                <option value="Assam">Assam</option>
+                                <option value="Bihar">Bihar</option>
+                                <option value="Chhattisgarh">Chhattisgarh</option>
+                                <option value="Goa">Goa</option>
+                                <option value="Gujarat">Gujarat</option>
+                                <option value="Haryana">Haryana</option>
+                                <option value="Himachal Pradesh">Himachal Pradesh</option>
+                                <option value="Jharkhand">Jharkhand</option>
+                                <option value="Karnataka">Karnataka</option>
+                                <option value="Kerala">Kerala</option>
+                                <option value="Madhya Pradesh">Madhya Pradesh</option>
+                                <option value="Maharashtra">Maharashtra</option>
+                                <option value="Manipur">Manipur</option>
+                                <option value="Meghalaya">Meghalaya</option>
+                                <option value="Mizoram">Mizoram</option>
+                                <option value="Nagaland">Nagaland</option>
+                                <option value="Odisha">Odisha</option>
+                                <option value="Punjab">Punjab</option>
+                                <option value="Rajasthan">Rajasthan</option>
+                                <option value="Sikkim">Sikkim</option>
+                                <option value="Tamil Nadu">Tamil Nadu</option>
+                                <option value="Telangana">Telangana</option>
+                                <option value="Tripura">Tripura</option>
+                                <option value="Uttar Pradesh">Uttar Pradesh</option>
+                                <option value="Uttarakhand">Uttarakhand</option>
+                                <option value="West Bengal">West Bengal</option>
+                                <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
+                                <option value="Chandigarh">Chandigarh</option>
+                                <option value="Dadra and Nagar Haveli and Daman and Diu">Dadra and Nagar Haveli and Daman and Diu</option>
+                                <option value="Delhi">Delhi</option>
+                                <option value="Jammu and Kashmir">Jammu and Kashmir</option>
+                                <option value="Ladakh">Ladakh</option>
+                                <option value="Lakshadweep">Lakshadweep</option>
+                                <option value="Puducherry">Puducherry</option>
+                            </select>
+                        </div>
+                        <div class="form-group gst-field" style="display:none;">
+                            <label>Tax Type</label>
+                            <select id="saleTaxType" class="form-control" onchange="updateCartDisplay()">
+                                <option value="auto">Auto (Detect from State)</option>
+                                <option value="intra">Intra-State (CGST + SGST)</option>
+                                <option value="inter">Inter-State (IGST)</option>
+                            </select>
                         </div>
                         <div class="form-group">
                             <label>Payment Method</label>
@@ -1800,6 +1919,22 @@
                         <h4>Total Discount</h4>
                         <p id="reportTotalDiscount">₹0</p>
                     </div>
+                    <div class="summary-card gst-field" style="display:none;">
+                        <h4>Taxable Value</h4>
+                        <p id="reportTaxableValue">₹0</p>
+                    </div>
+                    <div class="summary-card gst-field" style="display:none;">
+                        <h4>Total CGST</h4>
+                        <p id="reportTotalCGST">₹0</p>
+                    </div>
+                    <div class="summary-card gst-field" style="display:none;">
+                        <h4>Total SGST</h4>
+                        <p id="reportTotalSGST">₹0</p>
+                    </div>
+                    <div class="summary-card gst-field" style="display:none;">
+                        <h4>Total IGST</h4>
+                        <p id="reportTotalIGST">₹0</p>
+                    </div>
                     <div class="summary-card">
                         <h4>Transactions</h4>
                         <p id="reportTransactions">0</p>
@@ -1843,6 +1978,10 @@
                                     <tr>
                                         <th>Product</th>
                                         <th>Units Sold</th>
+                                        <th class="gst-field" style="display:none;">Taxable Value</th>
+                                        <th class="gst-field" style="display:none;">CGST</th>
+                                        <th class="gst-field" style="display:none;">SGST</th>
+                                        <th class="gst-field" style="display:none;">IGST</th>
                                         <th>Revenue</th>
                                         <th>Discount</th>
                                         <th>% of Total</th>
@@ -2176,6 +2315,219 @@
                 </div>
             </div>
 
+            <!-- Settings Tab -->
+            <div id="settings" class="tab-content" style="display: none;">
+                <h2 class="section-title">⚙️ Settings</h2>
+                <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                    
+                    <!-- Left Column -->
+                    <div style="flex: 1; min-width: 350px;">
+                        <div style="background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px;">
+                            <h3>👤 Business Profile</h3>
+                            <div class="form-group"><label>Business / Shop Name</label><input type="text" id="settingsBusinessName" class="form-control"></div>
+                            <div class="form-group"><label>Tagline / Subtitle</label><input type="text" id="settingsTagline" class="form-control" placeholder="e.g. Inventory & Sales System"></div>
+                            <div class="form-group">
+                                <label>Business Logo</label>
+                                <div style="display: flex; gap: 10px; align-items: center; margin-top: 5px;">
+                                    <img id="settingsLogoPreview" src="" style="max-height: 50px; display: none; border-radius: 4px; border: 1px solid #ddd;">
+                                    <input type="file" id="settingsLogoInput" accept="image/*" style="display: none;" onchange="handleLogoUpload(event)">
+                                    <button class="btn btn-secondary" style="font-size: 0.9em; padding: 5px 10px;" onclick="document.getElementById('settingsLogoInput').click()">Upload Logo</button>
+                                    <button id="settingsRemoveLogoBtn" class="btn btn-danger" style="display: none; font-size: 0.9em; padding: 5px 10px;" onclick="removeLogo()">Remove</button>
+                                </div>
+                            </div>
+                            <div class="form-group"><label>Mobile Number</label><input type="text" id="settingsMobile" class="form-control"></div>
+                            <div class="form-group"><label>Email</label><input type="text" id="settingsEmail" class="form-control"></div>
+                            <div class="form-group"><label>Website</label><input type="text" id="settingsWebsite" class="form-control"></div>
+                            <div class="form-group"><label>Address</label><textarea id="settingsAddress" class="form-control"></textarea></div>
+                            <div class="form-group"><label>GSTIN (Optional)</label><input type="text" id="settingsGSTIN" class="form-control"></div>
+                            <button class="btn btn-success" style="width: 100%;" onclick="saveSettings()">Save Business Profile</button>
+                        </div>
+                        
+                        <div style="background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px;">
+                            <h3>🖨️ Printer Settings</h3>
+                            <div class="form-group">
+                                <label>Receipt Size</label>
+                                <select id="settingsReceiptSize" class="form-control" onchange="saveSettings()">
+                                    <option value="58mm">58mm (Thermal)</option>
+                                    <option value="80mm">80mm (Thermal)</option>
+                                    <option value="A4">A4 (Standard)</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="display:flex; justify-content:space-between; align-items:center;">
+                                <label style="margin:0;">Auto Print After Sale</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="settingsAutoPrint" onchange="saveSettings()">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Middle Column -->
+                    <div style="flex: 1; min-width: 350px;">
+                        <div style="background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px;">
+                            <h3>📝 GST & Tax</h3>
+                            <div class="form-group" style="display:flex; justify-content:space-between; align-items:center;">
+                                <label style="margin:0;">GST Enabled</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="settingsGSTEnabled" onchange="saveSettings()">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div id="gstExtendedSettings" style="display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;">
+                                <div class="form-group">
+                                    <label>Business State (for Auto-GST)</label>
+                                    <select id="settingsBusinessState" class="form-control" onchange="saveSettings()">
+                                        <option value="">Select State...</option>
+                                        <option value="Andhra Pradesh">Andhra Pradesh</option>
+                                        <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+                                        <option value="Assam">Assam</option>
+                                        <option value="Bihar">Bihar</option>
+                                        <option value="Chhattisgarh">Chhattisgarh</option>
+                                        <option value="Goa">Goa</option>
+                                        <option value="Gujarat">Gujarat</option>
+                                        <option value="Haryana">Haryana</option>
+                                        <option value="Himachal Pradesh">Himachal Pradesh</option>
+                                        <option value="Jharkhand">Jharkhand</option>
+                                        <option value="Karnataka">Karnataka</option>
+                                        <option value="Kerala">Kerala</option>
+                                        <option value="Madhya Pradesh">Madhya Pradesh</option>
+                                        <option value="Maharashtra">Maharashtra</option>
+                                        <option value="Manipur">Manipur</option>
+                                        <option value="Meghalaya">Meghalaya</option>
+                                        <option value="Mizoram">Mizoram</option>
+                                        <option value="Nagaland">Nagaland</option>
+                                        <option value="Odisha">Odisha</option>
+                                        <option value="Punjab">Punjab</option>
+                                        <option value="Rajasthan">Rajasthan</option>
+                                        <option value="Sikkim">Sikkim</option>
+                                        <option value="Tamil Nadu">Tamil Nadu</option>
+                                        <option value="Telangana">Telangana</option>
+                                        <option value="Tripura">Tripura</option>
+                                        <option value="Uttar Pradesh">Uttar Pradesh</option>
+                                        <option value="Uttarakhand">Uttarakhand</option>
+                                        <option value="West Bengal">West Bengal</option>
+                                        <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
+                                        <option value="Chandigarh">Chandigarh</option>
+                                        <option value="Dadra and Nagar Haveli and Daman and Diu">Dadra and Nagar Haveli and Daman and Diu</option>
+                                        <option value="Delhi">Delhi</option>
+                                        <option value="Jammu and Kashmir">Jammu and Kashmir</option>
+                                        <option value="Ladakh">Ladakh</option>
+                                        <option value="Lakshadweep">Lakshadweep</option>
+                                        <option value="Puducherry">Puducherry</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Tax Pricing Mode</label>
+                                    <select id="settingsTaxPricingMode" class="form-control" onchange="saveSettings()">
+                                        <option value="exclusive">Prices Exclusive of GST</option>
+                                        <option value="inclusive">Prices Inclusive of GST</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Default Bill Tax Type</label>
+                                    <select id="settingsDefaultTaxType" class="form-control" onchange="saveSettings()">
+                                        <option value="auto">Auto (Detect from State)</option>
+                                        <option value="intra">Intra-State (CGST + SGST)</option>
+                                        <option value="inter">Inter-State (IGST)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px;">
+                            <h3>🧾 Receipt Settings</h3>
+                            <div class="form-group"><label>Footer Message</label><textarea id="settingsFooterMsg" class="form-control"></textarea></div>
+                            <div class="form-group" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
+                                <label style="margin:0;">Show Customer Name</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="settingsShowCustomer" onchange="saveSettings()">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="form-group" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
+                                <label style="margin:0;">Show Discount</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="settingsShowDiscount" onchange="saveSettings()">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="form-group" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
+                                <label style="margin:0;">Show Payment Method</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="settingsShowPayment" onchange="saveSettings()">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="form-group" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
+                                <label style="margin:0;">Show GST</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="settingsShowGST" onchange="saveSettings()">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="form-group" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
+                                <label style="margin:0;">Show Barcode</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="settingsShowBarcode" onchange="saveSettings()">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <button class="btn btn-success" onclick="saveSettings()" style="width: 100%;">Save Receipt Settings</button>
+                        </div>
+
+                        <div style="background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px;">
+                            <h3>🔐 Account / Security</h3>
+                            <div class="form-group">
+                                <label>Current Admin Password</label>
+                                <input type="password" id="settingsCurrentPwd" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label>New Password</label>
+                                <input type="password" id="settingsNewPwd" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label>Confirm New Password</label>
+                                <input type="password" id="settingsConfirmPwd" class="form-control">
+                            </div>
+                            <div class="form-group" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
+                                <label style="margin:0;">Show Passwords</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="settingsShowPasswords" onchange="document.getElementById('settingsCurrentPwd').type = this.checked ? 'text' : 'password'; document.getElementById('settingsNewPwd').type = this.checked ? 'text' : 'password'; document.getElementById('settingsConfirmPwd').type = this.checked ? 'text' : 'password';">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <button class="btn btn-primary" onclick="changeAdminPassword()" style="width: 100%;">Change Password</button>
+                        </div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div style="flex: 1; min-width: 350px;">
+                        <div style="background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px;">
+                            <h3>💾 Backup & Restore</h3>
+                            <button class="btn btn-primary" onclick="createBackup()" style="margin-bottom: 10px; width: 100%;">Backup Now</button>
+                            <p style="font-size: 0.9em; color: #666;" id="lastBackupLabel">Last Backup: Never</p>
+                            <hr>
+                            <input type="file" id="restoreFileBtn" style="display: none;" accept=".json" onchange="handleRestoreBackup(event)">
+                            <button class="btn btn-danger" onclick="document.getElementById('restoreFileBtn').click()" style="width: 100%;">Restore Backup</button>
+                        </div>
+
+                        <div style="background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px;">
+                            <h3>🔑 License</h3>
+                            <p><strong>Status:</strong> Active</p>
+                            <p><strong>License Type:</strong> One-Time / Single Computer</p>
+                            <p><strong>Version:</strong> 1.0.0</p>
+                        </div>
+
+                        <div style="background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                            <h3>ℹ️ About</h3>
+                            <p>Business App v1.0.0</p>
+                            <button class="btn btn-secondary" style="width: 100%;" onclick="showAlert('You are on the latest version.', 'info')">Check for Updates</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -2259,9 +2611,6 @@
                             <option value="Litre">Litre (L)</option>
                             <option value="Millilitre">Millilitre (ml)</option>
                             <option value="Meter">Meter (m)</option>
-                            <option value="Centimeter">Centimeter (cm)</option>
-                            <option value="Inch">Inch</option>
-                            <option value="Feet">Feet</option>
                             <option value="Bottle">Bottle</option>
                             <option value="Tin">Tin</option>
                             <option value="Can">Can</option>
@@ -2276,8 +2625,22 @@
                         <label>Unit Price (₹)</label>
                         <input type="number" id="editProductPrice" step="0.01" required>
                     </div>
-
-                    <!-- Edit Pack Sizes Section -->
+                    <div class="form-group gst-field" style="display:none;">
+                        <label>HSN/SAC Code</label>
+                        <input type="text" id="editProductHSN" placeholder="e.g. 4820">
+                    </div>
+                    <div class="form-group gst-field" style="display:none;">
+                        <label>GST Rate (%)</label>
+                        <select id="editProductGSTRate" onchange="document.getElementById('editProductCustomGSTRate').style.display = this.value === 'custom' ? 'block' : 'none'">
+                            <option value="0">0%</option>
+                            <option value="5">5%</option>
+                            <option value="12">12%</option>
+                            <option value="18">18%</option>
+                            <option value="28">28%</option>
+                            <option value="custom">Custom</option>
+                        </select>
+                        <input type="number" id="editProductCustomGSTRate" placeholder="Enter %" style="display:none; margin-top:5px;" min="0" step="0.01">
+                    </div>
                     <div class="form-group"
                         style="grid-column: 1 / -1; background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #dee2e6;">
                         <label style="margin-bottom: 10px; display: block;">Pack Sizes (Optional)</label>
@@ -2359,6 +2722,14 @@
                     <label>Supplier Address</label>
                     <input type="text" id="purchaseSupplierAddress" placeholder="Enter Supplier Address">
                 </div>
+                <div class="form-group gst-field" style="display:none;">
+                    <label>Tax Type</label>
+                    <select id="purchaseTaxType" class="form-control" onchange="updatePurchaseTable()">
+                        <option value="auto">Auto (Detect from State)</option>
+                        <option value="intra">Intra-State (CGST + SGST)</option>
+                        <option value="inter">Inter-State (IGST)</option>
+                    </select>
+                </div>
                 <div class="form-group">
                     <label>Notes (Optional)</label>
                     <input type="text" id="purchaseNotes" placeholder="Additional notes...">
@@ -2406,6 +2777,10 @@
                         <div class="form-group">
                             <label>Product Name</label>
                             <input type="text" id="newProductName" required placeholder="e.g., Blue Ballpoint Pen">
+                        </div>
+                        <div class="form-group gst-field" style="display:none;">
+                            <label>HSN/SAC Code</label>
+                            <input type="text" id="newProductHSN" placeholder="e.g. 4820">
                         </div>
                         <div class="form-group">
                             <label>Category</label>
@@ -2465,8 +2840,20 @@
                                 <option value="Sheet">Sheet</option>
                             </select>
                         </div>
+                        <div class="form-group gst-field" style="display:none;">
+                            <label>GST Rate (%)</label>
+                            <select id="newProductGSTRate" onchange="document.getElementById('newProductCustomGSTRate').style.display = this.value === 'custom' ? 'block' : 'none'">
+                                <option value="0">0%</option>
+                                <option value="5">5%</option>
+                                <option value="12">12%</option>
+                                <option value="18">18%</option>
+                                <option value="28">28%</option>
+                                <option value="custom">Custom</option>
+                            </select>
+                            <input type="number" id="newProductCustomGSTRate" placeholder="Enter %" style="display:none; margin-top:5px;" min="0" step="0.01">
+                        </div>
                         <div class="form-group">
-                            <label>Unit Price (₹)</label>
+                            <label>Selling Price (₹) — Incl. GST</label>
                             <input type="number" id="newProductSellingPrice" placeholder="10.00">
                         </div>
                         <div class="form-group">
@@ -2551,8 +2938,15 @@
                         <tr style="background: #343a40; color: white;">
                             <th>S.No</th>
                             <th>Product Name</th>
+                            <th class="gst-field" style="display:none;">HSN</th>
+                            <th class="gst-field" style="display:none;">GST%</th>
                             <th>Qty</th>
                             <th>Rate</th>
+                            <th class="gst-field" style="display:none;">Amount</th>
+                            <th class="gst-field" style="display:none;">Subtotal</th>
+                            <th id="th-purchase-cgst" style="display:none;">CGST</th>
+                            <th id="th-purchase-sgst" style="display:none;">SGST</th>
+                            <th id="th-purchase-igst" style="display:none;">IGST</th>
                             <th>Total</th>
                             <th>Action</th>
                         </tr>
@@ -2560,14 +2954,14 @@
                     <tbody id="purchaseTableBody"></tbody>
                     <tfoot style="background: #f8f9fa;">
                         <tr>
-                            <td colspan="5" style="text-align: right; font-weight: bold; padding: 10px;">Subtotal:
+                            <td colspan="4" class="purchase-colspan" style="text-align: right; font-weight: bold; padding: 10px;">Subtotal:
                             </td>
                             <td style="font-weight: bold; padding: 10px;">₹<span id="purchaseSubtotalValue">0.00</span>
                             </td>
                             <td></td>
                         </tr>
                         <tr>
-                            <td colspan="5" style="text-align: right; font-weight: bold; padding: 10px;">Discount
+                            <td colspan="4" class="purchase-colspan" style="text-align: right; font-weight: bold; padding: 10px;">Discount
                                 (₹):</td>
                             <td style="padding: 5px;"><input type="number" id="purchaseDiscount" value="0"
                                     oninput="updatePurchaseTable()" min="0" step="0.01"
@@ -2576,7 +2970,7 @@
                             <td></td>
                         </tr>
                         <tr>
-                            <td colspan="5" style="text-align: right; font-weight: bold; padding: 10px;">Packing /
+                            <td colspan="4" class="purchase-colspan" style="text-align: right; font-weight: bold; padding: 10px;">Packing /
                                 Other
                                 Charges (₹):</td>
                             <td style="padding: 5px;"><input type="number" id="purchaseOtherCharges" value="0"
@@ -2586,7 +2980,7 @@
                             <td></td>
                         </tr>
                         <tr style="border-top: 2px solid #dee2e6;">
-                            <td colspan="5"
+                            <td colspan="4" class="purchase-colspan"
                                 style="text-align: right; font-weight: bold; font-size: 1.2em; padding: 15px;">Grand
                                 Total:</td>
                             <td style="font-weight: bold; font-size: 1.2em; color: #28a745; padding: 15px;">₹<span
@@ -2595,6 +2989,7 @@
                         </tr>
                     </tfoot>
                 </table>
+                <div id="purchaseGstSummary" style="display:none; padding: 15px; border-top: 1px solid #dee2e6; background: #fff;"></div>
             </div>
             <div id="purchaseBillItemCount" style="margin-top: 10px; color: #666;">Items: <span id="purchaseItemCount">0</span></div>
 
@@ -3419,7 +3814,7 @@
 
             const jsonString = JSON.stringify(backupData, null, 2);
             const dateStr = new Date().toISOString().split('T')[0];
-            const filename = `doodles-backup-${dateStr}.json`;
+            const filename = `sales-backup-${dateStr}.json`;
 
             if (window.electronAPI) {
                 const folder = localStorage.getItem('database_folder');
@@ -3653,7 +4048,9 @@
                     qty: qty,
                     price: price,
                     sellingPrice: sellingPrice,
-                    total: qty * price
+                    total: qty * price,
+                    gstRate: selectedPurchaseProduct.gstRate || 0,
+                    hsn: selectedPurchaseProduct.hsn || ''
                 });
             }
 
@@ -3690,28 +4087,98 @@
             updatePurchaseTable();
         }
 
-        // Update Table
         function updatePurchaseTable() {
             const tbody = document.getElementById('purchaseTableBody');
+            
+            const settings = JSON.parse(localStorage.getItem('settings') || 'null') || getDefaultSettings();
+            const gstEnabled = settings.gstEnabled === true;
+            
+            const taxTypeEl = document.getElementById('purchaseTaxType');
+            let taxTypeInput = taxTypeEl ? taxTypeEl.value : 'auto';
+            
+            let taxType = taxTypeInput;
+            if (taxType === 'auto') {
+                taxType = 'intra'; // Default to intra if auto, since supplier state is removed
+            }
+
+            const thCGST = document.getElementById('th-purchase-cgst');
+            const thSGST = document.getElementById('th-purchase-sgst');
+            const thIGST = document.getElementById('th-purchase-igst');
+            if (thCGST) thCGST.style.display = (gstEnabled && taxType !== 'inter') ? 'table-cell' : 'none';
+            if (thSGST) thSGST.style.display = (gstEnabled && taxType !== 'inter') ? 'table-cell' : 'none';
+            if (thIGST) thIGST.style.display = (gstEnabled && taxType === 'inter') ? 'table-cell' : 'none';
+            
             let subtotal = 0;
+            let totalTaxableValue = 0;
+            let totalCGST = 0;
+            let totalSGST = 0;
+            let totalIGST = 0;
+            let totalTaxAmount = 0;
 
             if (purchaseCart.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #6c757d; padding: 20px;">No items added yet</td></tr>';
+                const colSpan = gstEnabled ? "10" : "6";
+                tbody.innerHTML = `<tr><td colspan="${colSpan}" style="text-align: center; color: #6c757d; padding: 20px;">No items added yet</td></tr>`;
                 document.getElementById('purchaseItemCount').textContent = '0';
                 document.getElementById('purchaseSubtotalValue').textContent = '0.00';
                 document.getElementById('purchaseTotalValue').textContent = '0.00';
+                if (document.getElementById('purchaseGstSummary')) document.getElementById('purchaseGstSummary').style.display = 'none';
                 return;
             }
 
             tbody.innerHTML = purchaseCart.map((item, index) => {
-                subtotal += item.total;
                 const prod = products.find(p => p.id == item.productId);
                 const currentStock = prod ? prod.stock : 0;
+                
+                let gstRate = item.gstRate || 0;
+                let price = item.price || 0;
+                let quantity = item.qty || 1;
+                let hsn = item.hsn || '';
+                
+                // GST Calculations
+                let taxableValue = 0;
+                let cgst = 0;
+                let sgst = 0;
+                let igst = 0;
+                let totalTax = 0;
+                let finalTotal = 0;
+                let grossAmount = price * quantity;
+                
+                if (gstEnabled && gstRate > 0) {
+                    taxableValue = grossAmount * 100 / (100 + gstRate);
+                    totalTax = grossAmount - taxableValue;
+                    finalTotal = grossAmount;
+                    
+                    if (taxType === 'inter') {
+                        igst = totalTax;
+                    } else {
+                        cgst = totalTax / 2;
+                        sgst = totalTax / 2;
+                    }
+                } else {
+                    taxableValue = grossAmount;
+                    finalTotal = grossAmount;
+                }
+                
+                item.taxableValue = taxableValue;
+                item.cgst = cgst;
+                item.sgst = sgst;
+                item.igst = igst;
+                item.totalTax = totalTax;
+                item.finalTotal = finalTotal;
+                item.taxType = taxType; // Store on item
+                
+                subtotal += finalTotal;
+                totalTaxableValue += taxableValue;
+                totalCGST += cgst;
+                totalSGST += sgst;
+                totalIGST += igst;
+                totalTaxAmount += totalTax;
 
                 return `
                 <tr>
                     <td>${index + 1}</td>
                     <td>${item.name}</td>
+                    ${gstEnabled ? `<td>${hsn}</td><td style="text-align: right;">${gstRate}%</td>` : ''}
                     <td>
                         <input type="number"
                                value="${item.qty}"
@@ -3721,10 +4188,24 @@
                                onchange="updatePurchaseItemQty(${index}, this.value)">
                     </td>
                     <td>₹${item.price.toFixed(2)}</td>
-                    <td>₹${item.total.toFixed(2)}</td>
+                    ${gstEnabled ? `
+                        <td style="text-align: right;">₹${grossAmount.toFixed(2)}</td>
+                        <td style="text-align: right;">₹${taxableValue.toFixed(2)}</td>
+                        ${taxType !== 'inter' ? `<td style="text-align: right;">₹${cgst.toFixed(2)}</td><td style="text-align: right;">₹${sgst.toFixed(2)}</td>` : ''}
+                        ${taxType === 'inter' ? `<td style="text-align: right;">₹${igst.toFixed(2)}</td>` : ''}
+                    ` : ''}
+                    <td>₹${finalTotal.toFixed(2)}</td>
                     <td><button class="btn btn-danger btn-sm purchase-remove-btn" onclick="removePurchaseItem(${index})">Remove</button></td>
                 </tr>
             `}).join('');
+
+            document.querySelectorAll('.purchase-colspan').forEach(el => {
+                if (gstEnabled) {
+                    el.colSpan = taxType === 'inter' ? "9" : "10";
+                } else {
+                    el.colSpan = "4";
+                }
+            });
 
             document.getElementById('purchaseItemCount').textContent = purchaseCart.length;
             document.getElementById('purchaseSubtotalValue').textContent = subtotal.toFixed(2);
@@ -3734,6 +4215,36 @@
             const total = subtotal - discount + other;
 
             document.getElementById('purchaseTotalValue').textContent = total.toFixed(2);
+            
+            let discountRatio = 1;
+            if (subtotal > 0 && discount > 0 && discount <= subtotal) {
+                discountRatio = (subtotal - discount) / subtotal;
+            }
+
+            const finalTaxableValue = totalTaxableValue * discountRatio;
+            const finalCGST = totalCGST * discountRatio;
+            const finalSGST = totalSGST * discountRatio;
+            const finalIGST = totalIGST * discountRatio;
+            const finalTotalGST = totalTaxAmount * discountRatio;
+
+            const gstSummaryBox = document.getElementById('purchaseGstSummary');
+            if (gstEnabled && gstSummaryBox) {
+                gstSummaryBox.style.display = 'block';
+                gstSummaryBox.innerHTML = `
+                    <h4 style="margin: 0 0 10px 0; color: #007bff;">📊 Tax Summary</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div><strong>Total Taxable Value:</strong> ₹${finalTaxableValue.toFixed(2)}</div>
+                        ${taxType === 'inter' ? 
+                            `<div><strong>Total IGST:</strong> ₹${finalIGST.toFixed(2)}</div>` : 
+                            `<div><strong>Total CGST:</strong> ₹${finalCGST.toFixed(2)}</div><div><strong>Total SGST:</strong> ₹${finalSGST.toFixed(2)}</div>`
+                        }
+                        <div><strong>Total GST:</strong> ₹${finalTotalGST.toFixed(2)}</div>
+                    </div>
+                `;
+            } else if (gstSummaryBox) {
+                gstSummaryBox.style.display = 'none';
+            }
+            
             updateUIForRole();
         }
 
@@ -3944,12 +4455,19 @@
                 return;
             }
 
+            const supplierStateEl = document.getElementById('purchaseSupplierState');
+            const supplierState = supplierStateEl ? supplierStateEl.value : '';
+            const taxTypeEl = document.getElementById('purchaseTaxType');
+            const taxType = taxTypeEl ? taxTypeEl.value : 'auto';
+
             const record = {
                 id: Date.now(),
                 invoiceNumber: invoice,
                 supplier: supplier,
                 supplierPhone: phone,
                 supplierAddress: address,
+                supplierState: supplierState,
+                taxType: taxType,
                 date: date,
                 notes: notes,
                 items: purchaseCart,
@@ -4076,6 +4594,17 @@
                 const costPriceEl = document.getElementById('newProductPurchasePrice');
                 const costPrice = costPriceEl ? parseFloat(costPriceEl.value) || 0 : 0;
 
+                const hsnEl = document.getElementById('newProductHSN');
+                const hsn = hsnEl ? hsnEl.value : '';
+
+                const gstRateEl = document.getElementById('newProductGSTRate');
+                let gstRate = gstRateEl ? gstRateEl.value : '0';
+                if (gstRate === 'custom') {
+                    const customGstEl = document.getElementById('newProductCustomGSTRate');
+                    gstRate = customGstEl ? customGstEl.value : '0';
+                }
+                gstRate = parseFloat(gstRate) || 0;
+
                 const stockEl = document.getElementById('newProductInitialStock');
                 const stock = stockEl ? parseInt(stockEl.value) || 0 : 0;
 
@@ -4150,6 +4679,8 @@
                         newProd.unit = unit;
                         newProd.price = sellingPrice;
                         newProd.costPrice = costPrice;
+                        newProd.hsn = hsn;
+                        newProd.gstRate = gstRate;
                         newProd.stock = (parseInt(newProd.stock) || 0) + stock;
                         newProd.minStock = minStock;
                         if (desc) newProd.description = desc;
@@ -4165,6 +4696,8 @@
                             unit: unit,
                             price: sellingPrice,
                             costPrice: costPrice,
+                            hsn: hsn,
+                            gstRate: gstRate,
                             stock: stock,
                             minStock: minStock,
                             description: desc,
@@ -5965,30 +6498,153 @@
             updateCartDisplay();
         }
 
+        function updateCartItemDiscount(index, value) {
+            cart[index].discountPercent = parseFloat(value) || 0;
+            updateCartDisplay();
+        }
+
         function updateCartDisplay() {
             const cartItemsDiv = document.getElementById('cartItems');
-            const subtotal = cart.reduce((sum, item) => sum + item.total, 0);
+            const globalDiscountAmount = parseFloat(document.getElementById('discountAmount').value) || 0;
+            
+            // Tax Settings
+            const gstEnabled = settings.gstEnabled;
+            const businessState = settings.businessState || '';
+            const customerStateEl = document.getElementById('customerState');
+            const customerState = customerStateEl ? customerStateEl.value : '';
+            const taxTypeEl = document.getElementById('saleTaxType');
+            let taxTypeInput = taxTypeEl ? taxTypeEl.value : (settings.defaultTaxType || 'auto');
+            const pricingMode = settings.taxPricingMode || 'exclusive';
+            
+            let taxType = taxTypeInput;
+            if (taxType === 'auto') {
+                if (businessState && customerState && businessState !== customerState) {
+                    taxType = 'inter';
+                } else {
+                    taxType = 'intra';
+                }
+            }
 
-            document.getElementById('cartSubtotal').value = subtotal.toFixed(2);
-            document.getElementById('cartTotal').value = subtotal.toFixed(2);
-            if (document.getElementById('discountAmount')) updateDiscount(); // ADD THIS LINE
+            let totalGross = 0;
+            let totalItemDiscount = 0;
+            let totalTaxable = 0;
+            let totalCGST = 0;
+            let totalSGST = 0;
+            let totalIGST = 0;
+            let totalGST = 0;
+            let grandTotal = 0;
 
+            cart.forEach(item => {
+                const product = products.find(p => p.id === item.productId);
+                const gstRate = (gstEnabled && product) ? (product.gstRate || 0) : 0;
+                
+                item.discountPercent = item.discountPercent || 0;
+                let grossAmount = item.quantity * item.price;
+                let itemDiscountAmount = grossAmount * (item.discountPercent / 100);
+                let netInclusive = grossAmount - itemDiscountAmount;
+                
+                let taxableValue = 0;
+                let cgst = 0, sgst = 0, igst = 0, itemTax = 0;
+                let finalTotal = netInclusive; // Final total is always the discounted inclusive amount
+
+                if (gstEnabled && gstRate > 0) {
+                    taxableValue = netInclusive * 100 / (100 + gstRate);
+                    itemTax = netInclusive - taxableValue;
+
+                    if (taxType === 'intra') {
+                        cgst = itemTax / 2;
+                        sgst = itemTax / 2;
+                    } else {
+                        igst = itemTax;
+                    }
+                } else {
+                    taxableValue = netInclusive;
+                }
+
+                item.discount = itemDiscountAmount;
+                item.grossAmount = grossAmount;
+                item.taxableValue = taxableValue;
+                item.cgst = cgst;
+                item.sgst = sgst;
+                item.igst = igst;
+                item.totalTax = itemTax;
+                item.finalTotal = finalTotal;
+                item.hsn = product ? (product.hsn || '') : '';
+                item.gstRate = gstRate;
+
+                totalGross += grossAmount;
+                totalItemDiscount += item.discount;
+                totalTaxable += taxableValue;
+                totalCGST += cgst;
+                totalSGST += sgst;
+                totalIGST += igst;
+                totalGST += itemTax;
+                grandTotal += finalTotal;
+            });
+
+            // Adjust grandTotal with global discount and courier
+            const courierCharges = parseFloat(document.getElementById('courierCharges').value) || 0;
+            
+            let discountRatio = 1;
+            if (grandTotal > 0 && globalDiscountAmount > 0 && globalDiscountAmount <= grandTotal) {
+                discountRatio = (grandTotal - globalDiscountAmount) / grandTotal;
+            }
+
+            const finalTaxableValue = totalTaxable * discountRatio;
+            const finalCGST = totalCGST * discountRatio;
+            const finalSGST = totalSGST * discountRatio;
+            const finalIGST = totalIGST * discountRatio;
+
+            let netGrandTotal = (grandTotal - globalDiscountAmount) + courierCharges;
+            if (netGrandTotal < 0) netGrandTotal = 0;
+
+            document.getElementById('cartSubtotal').value = grandTotal.toFixed(2);
+            document.getElementById('cartTotal').value = netGrandTotal.toFixed(2);
+
+            const elTaxable = document.getElementById('cartTaxableAmount');
+            if (elTaxable) elTaxable.value = finalTaxableValue.toFixed(2);
+            
+            const elCGST = document.getElementById('cartCGST');
+            if (elCGST) elCGST.value = finalCGST.toFixed(2);
+            
+            const elSGST = document.getElementById('cartSGST');
+            if (elSGST) elSGST.value = finalSGST.toFixed(2);
+            
+            const elIGST = document.getElementById('cartIGST');
+            if (elIGST) elIGST.value = finalIGST.toFixed(2);
+            
+            const summaryCGST = document.getElementById('summary-cgst');
+            const summarySGST = document.getElementById('summary-sgst');
+            const summaryIGST = document.getElementById('summary-igst');
+            
+            if (summaryCGST) summaryCGST.style.display = (gstEnabled && taxType !== 'inter') ? 'block' : 'none';
+            if (summarySGST) summarySGST.style.display = (gstEnabled && taxType !== 'inter') ? 'block' : 'none';
+            if (summaryIGST) summaryIGST.style.display = (gstEnabled && taxType === 'inter') ? 'block' : 'none';
+            
             if (cart.length === 0) {
                 cartItemsDiv.innerHTML = '<div class="alert alert-info">Cart is empty. Add items to continue.</div>';
                 return;
             }
 
-            cartItemsDiv.innerHTML = `
+            let tableHTML = `
                 <div class="scanner-container" style="background: white; border: 2px solid #dee2e6;">
                     <h3>Shopping Cart (${cart.length} item(s))</h3>
                     <div class="table-responsive">
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Product</th>
-                                    <th>Unit</th>
-                                    <th>Price</th>
-                                    <th>Quantity</th>
+                                    <th>S.No</th>
+                                    <th>Product Name</th>
+                                    <th>HSN</th>
+                                    <th>GST%</th>
+                                    <th>Qty</th>
+                                    <th>Rate</th>
+                                    <th>Disc %</th>
+                                    <th>Amount</th>
+                                    <th>Subtotal</th>
+                                    <th>CGST</th>
+                                    <th>SGST</th>
+                                    <th>IGST</th>
                                     <th>Total</th>
                                     <th>Action</th>
                                 </tr>
@@ -5996,31 +6652,56 @@
                             <tbody>
                                 ${cart.map((item, index) => `
                                     <tr>
+                                        <td>${index + 1}</td>
                                         <td>${item.productName}</td>
-                                        <td>${item.unit || 'Piece'}</td>
-                                        <td>₹${item.price.toFixed(2)}</td>
+                                        <td>${item.hsn || ''}</td>
+                                        <td>${item.gstRate || 0}%</td>
                                         <td>
-                                        <div class="quantity-controls">
-                                            <button class="qty-btn decrease" onclick="decreaseQuantity(${index})" title="Decrease quantity">-</button>
-                                            <span class="qty-value">${item.quantity}</span>
-                                            <button class="qty-btn increase" onclick="increaseQuantity(${index})" title="Increase quantity">+</button>
-                                        </div>
-                                    </td>
-                                    <td>₹${item.total.toFixed(2)}</td>
-                                    <td><button class="btn btn-cart-remove btn-sm" onclick="removeFromCart(${index})">Remove</button></td>
-                                </tr>
-                            `).join('')}
-                            <tr style="font-weight: bold; background: #f8f9fa;">
-                                <td colspan="4" style="text-align: right;">Subtotal:</td>
-                                <td>₹${subtotal.toFixed(2)}</td>
-                                <td></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                                            <div class="quantity-controls">
+                                                <button class="qty-btn decrease" onclick="decreaseQuantity(${index})">-</button>
+                                                <span class="qty-value">${item.quantity}</span>
+                                                <button class="qty-btn increase" onclick="increaseQuantity(${index})">+</button>
+                                            </div>
+                                        </td>
+                                        <td>₹${item.price.toFixed(2)}</td>
+                                        <td><input type="number" value="${item.discountPercent || 0}" min="0" max="100" style="width:60px; padding:2px;" onchange="updateCartItemDiscount(${index}, this.value)"></td>
+                                        <td>₹${item.grossAmount.toFixed(2)}</td>
+                                        <td>₹${(item.taxableValue || 0).toFixed(2)}</td>
+                                        <td>₹${(item.cgst || 0).toFixed(2)}</td>
+                                        <td>₹${(item.sgst || 0).toFixed(2)}</td>
+                                        <td>₹${(item.igst || 0).toFixed(2)}</td>
+                                        <td><strong>₹${item.finalTotal.toFixed(2)}</strong></td>
+                                        <td><button class="btn btn-cart-remove btn-sm" onclick="removeFromCart(${index})">Remove</button></td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
             `;
+            
+            if (gstEnabled) {
+                tableHTML += `
+                    <div style="margin-top:20px; padding:15px; background:#f8f9fa; border-radius:8px; display:inline-block; float:right; width:300px;">
+                        <h4 style="margin-top:0; border-bottom:1px solid #ddd; padding-bottom:10px;">Tax Summary</h4>
+                        <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>Gross Amount:</span> <span>₹${totalGross.toFixed(2)}</span></div>
+                        <div style="display:flex; justify-content:space-between; margin-bottom:5px; color:red;"><span>Total Item Disc:</span> <span>₹${totalItemDiscount.toFixed(2)}</span></div>
+                        <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>Taxable Value:</span> <span>₹${finalTaxableValue.toFixed(2)}</span></div>
+                        ${taxType === 'intra' ? `
+                            <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>CGST:</span> <span>₹${finalCGST.toFixed(2)}</span></div>
+                            <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>SGST:</span> <span>₹${finalSGST.toFixed(2)}</span></div>
+                        ` : `
+                            <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>IGST:</span> <span>₹${finalIGST.toFixed(2)}</span></div>
+                        `}
+                        <div style="display:flex; justify-content:space-between; margin-top:10px; border-top:1px solid #ddd; padding-top:10px; font-weight:bold; font-size:1.1em;">
+                            <span>Subtotal:</span> <span>₹${grandTotal.toFixed(2)}</span>
+                        </div>
+                    </div>
+                    <div style="clear:both;"></div>
+                `;
+            }
 
+            tableHTML += `</div>`;
+            cartItemsDiv.innerHTML = tableHTML;
             calculateChange();
         }
 
@@ -6257,10 +6938,27 @@
             }
 
             const customerName = document.getElementById('customerName').value || 'Walk-in Customer';
+            const customerGSTIN = document.getElementById('customerGSTIN') ? document.getElementById('customerGSTIN').value : '';
+            const customerAddress = document.getElementById('customerAddress') ? document.getElementById('customerAddress').value : '';
+            const customerStateEl = document.getElementById('customerState');
+            const customerState = customerStateEl ? customerStateEl.value : '';
+            const taxTypeEl = document.getElementById('saleTaxType');
+            let taxTypeInput = taxTypeEl ? taxTypeEl.value : (settings.defaultTaxType || 'auto');
+            
+            let taxType = taxTypeInput;
+            if (taxType === 'auto') {
+                const businessState = settings.businessState || '';
+                if (businessState && customerState && businessState !== customerState) {
+                    taxType = 'inter';
+                } else {
+                    taxType = 'intra';
+                }
+            }
+            
             const paymentMethod = document.getElementById('paymentMethod').value;
             const discount = parseFloat(document.getElementById('discountAmount').value) || 0;
             const courier = parseFloat(document.getElementById('courierCharges').value) || 0;
-            const subtotal = cart.reduce((sum, item) => sum + item.total, 0);
+            const subtotal = cart.reduce((sum, item) => sum + (item.finalTotal !== undefined ? item.finalTotal : item.total), 0);
             const total = parseFloat(document.getElementById('cartTotal').value) || 0;
 
             // Validate Cash Received field for cash and mixed payments
@@ -6377,8 +7075,22 @@
                             unit: item.unit || 'Piece',
                             quantity: item.quantity,
                             price: item.price,
-                            total: item.total,
+                            total: item.finalTotal !== undefined ? item.finalTotal : item.total,
+                            grossAmount: item.grossAmount || 0,
+                            taxableValue: item.taxableValue || 0,
+                            cgst: item.cgst || 0,
+                            sgst: item.sgst || 0,
+                            igst: item.igst || 0,
+                            totalTax: item.totalTax || 0,
+                            itemDiscount: item.discount || 0,
+                            discountPercent: item.discountPercent || 0,
+                            gstRate: item.gstRate || 0,
+                            hsn: item.hsn || '',
                             customerName: customerName,
+                            customerGSTIN: customerGSTIN,
+                            customerAddress: customerAddress,
+                            customerState: customerState,
+                            taxType: taxType,
                             paymentMethod: paymentMethod,
                             subtotal: subtotal,
                             discount: discount,
@@ -6547,32 +7259,46 @@
             const receiptContent = document.getElementById('receiptContent');
             const date = new Date(lastSaleData.date);
 
+            const settings = JSON.parse(localStorage.getItem('settings') || 'null') || getDefaultSettings();
+            
+            const businessNameStr = settings.businessName || 'Sales Receipt';
+            const addressStr = settings.address ? `<p style="font-size:12px; margin:2px 0;">${settings.address.replace(/\n/g, '<br>')}</p>` : '';
+            const mobileStr = settings.mobile ? `<p style="font-size:12px; margin:2px 0;">Ph: ${settings.mobile}</p>` : '';
+            const gstinStr = settings.gstin && settings.showGST ? `<p style="font-size:12px; margin:2px 0;">GSTIN: ${settings.gstin}</p>` : '';
+            const customerStr = settings.showCustomer && lastSaleData.customerName ? `<p><strong>Customer:</strong> ${lastSaleData.customerName}</p>` : '';
+            const footerStr = settings.footerMsg ? `<hr><p style="text-align: center; margin-top: 20px;">${settings.footerMsg.replace(/\n/g, '<br>')}</p>` : '<hr><p style="text-align: center; margin-top: 20px;">Thank you for your purchase!</p>';
+
             receiptContent.innerHTML = `
                 <div class="receipt-container">
-                    <h3 style="text-align: center; margin-bottom: 10px;">Sales Receipt</h3>
+                    <h3 style="text-align: center; margin-bottom: 5px;">${businessNameStr}</h3>
+                    ${addressStr}
+                    ${mobileStr}
+                    ${gstinStr}
                     <hr>
                     <p><strong>Date:</strong> ${date.toLocaleDateString()}</p>
                     <p><strong>Time:</strong> ${date.toLocaleTimeString()}</p>
                     <p><strong>Receipt #:</strong> ${lastSaleData.receiptNumber}</p>
-                    <p><strong>Customer:</strong> ${lastSaleData.customerName}</p>
+                    ${customerStr}
                     <hr>
                     <table style="width: 100%; margin: 10px 0;">
                         <thead>
                             <tr>
                                 <th style="text-align: left;">Item</th>
-                                <th style="text-align: left;">Unit</th>
+                                ${settings.gstEnabled ? '' : '<th style="text-align: left;">Unit</th>'}
                                 <th style="text-align: right;">Qty</th>
-                                <th style="text-align: right;">Price</th>
-                                <th style="text-align: right;">Total</th>
+                                <th style="text-align: right;">Rate</th>
+                                ${settings.gstEnabled ? '<th style="text-align: right;">GST%</th>' : ''}
+                                <th style="text-align: right;">${settings.gstEnabled ? 'Amount' : 'Total'}</th>
                             </tr>
                         </thead>
                         <tbody>
                             ${lastSaleData.items.map(item => `
                                 <tr>
                                     <td>${item.productName}</td>
-                                    <td>${item.unit || 'Piece'}</td>
+                                    ${settings.gstEnabled ? '' : `<td>${item.unit || 'Piece'}</td>`}
                                     <td style="text-align: right;">${item.quantity}</td>
                                     <td style="text-align: right;">₹${item.price.toFixed(2)}</td>
+                                    ${settings.gstEnabled ? `<td style="text-align: right;">${item.gstRate || 0}%</td>` : ''}
                                     <td style="text-align: right;">₹${item.total.toFixed(2)}</td>
                                 </tr>
                             `).join('')}
@@ -6582,7 +7308,7 @@
                                 <td colspan="4" style="text-align: right;">Subtotal:</td>
                                 <td style="text-align: right;">₹${(lastSaleData.subtotal || 0).toFixed(2)}</td>
                             </tr>
-                            ${(lastSaleData.discount > 0) ? `
+                            ${(settings.showDiscount && lastSaleData.discount > 0) ? `
                             <tr>
                                 <td colspan="4" style="text-align: right;">Discount:</td>
                                 <td style="text-align: right;">- ₹${lastSaleData.discount.toFixed(2)}</td>
@@ -6590,15 +7316,36 @@
                             ` : ''}
                             ${lastSaleData.courier && lastSaleData.courier > 0 ? `
                             <tr>
-                                <td colspan="4" style="text-align: right;">Courier Charges:</td>
+                                <td colspan="${settings.gstEnabled ? '4' : '4'}" style="text-align: right;">Courier Charges:</td>
                                 <td style="text-align: right;">₹${lastSaleData.courier.toFixed(2)}</td>
                             </tr>
                             ` : ''}
+                            ${settings.gstEnabled ? `
+                            <tr>
+                                <td colspan="4" style="text-align: right;">Total Taxable Value:</td>
+                                <td style="text-align: right;">₹${lastSaleData.items.reduce((sum, item) => sum + (item.taxableValue || 0), 0).toFixed(2)}</td>
+                            </tr>
+                            ${lastSaleData.items.some(i => i.taxType === 'inter') ? `
+                            <tr>
+                                <td colspan="4" style="text-align: right;">Total IGST:</td>
+                                <td style="text-align: right;">₹${lastSaleData.items.reduce((sum, item) => sum + (item.igst || 0), 0).toFixed(2)}</td>
+                            </tr>
+                            ` : `
+                            <tr>
+                                <td colspan="4" style="text-align: right;">Total CGST:</td>
+                                <td style="text-align: right;">₹${lastSaleData.items.reduce((sum, item) => sum + (item.cgst || 0), 0).toFixed(2)}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" style="text-align: right;">Total SGST:</td>
+                                <td style="text-align: right;">₹${lastSaleData.items.reduce((sum, item) => sum + (item.sgst || 0), 0).toFixed(2)}</td>
+                            </tr>
+                            `}
+                            ` : ''}
         <tr style="font-weight: bold; border-top: 2px solid #333;">
-            <td colspan="4" style="text-align: right;">Total:</td>
+            <td colspan="${settings.gstEnabled ? '4' : '4'}" style="text-align: right;">Grand Total:</td>
             <td style="text-align: right;">₹${lastSaleData.total.toFixed(2)}</td>
         </tr>
-                            ${lastSaleData.paymentMethod === 'cash' ? `
+                            ${settings.showPayment && lastSaleData.paymentMethod === 'cash' ? `
                                 <tr>
                                     <td colspan="4" style="text-align: right;">Cash Received:</td>
                                     <td style="text-align: right;">₹${lastSaleData.cashAmount.toFixed(2)}</td>
@@ -6609,7 +7356,7 @@
                                 </tr>
                             ` : ''
                 }
-                            ${lastSaleData.paymentMethod === 'mixed' ? `
+                            ${settings.showPayment && lastSaleData.paymentMethod === 'mixed' ? `
                                 <tr>
                                     <td colspan="4" style="text-align: right;">Cash:</td>
                                     <td style="text-align: right;">₹${lastSaleData.cashAmount.toFixed(2)}</td>
@@ -6630,22 +7377,35 @@
                                 ` : ''}
                             ` : ''
                 }
+        ${settings.showPayment ? `
         <tr>
             <td colspan="4" style="text-align: right;">Payment Method:</td>
             <td style="text-align: right;">${lastSaleData.paymentMethod.toUpperCase()}</td>
         </tr>
+        ` : ''}
                         </tfoot >
                     </table >
-            <hr>
-                <p style="text-align: center; margin-top: 20px;">Thank you for your purchase!</p>
+                    ${footerStr}
             </div>
         `;
 
             document.getElementById('saleReceipt').style.display = 'block';
             document.getElementById('saleReceipt').scrollIntoView({ behavior: 'smooth' });
+            
+            if (settings.autoPrint) {
+                setTimeout(printReceipt, 500);
+            }
         }
 
         function printReceipt() {
+            const settings = JSON.parse(localStorage.getItem('settings') || 'null') || getDefaultSettings();
+            let bodyStyle = 'margin: 0; padding: 5px;';
+            if (settings.receiptSize === '58mm') {
+                bodyStyle += ' width: 58mm; max-width: 58mm; margin: 0 auto;';
+            } else if (settings.receiptSize === '80mm') {
+                bodyStyle += ' width: 80mm; max-width: 80mm; margin: 0 auto;';
+            }
+
             const printContent = document.getElementById('receiptContent').innerHTML;
             const printWindow = window.open('', '', 'height=600,width=800');
             printWindow.document.write(`
@@ -6655,7 +7415,7 @@
                         <style>
                             @media print {
                                 @page { margin: 0; }
-                                body { margin: 0; padding: 5px; }
+                                body { ${bodyStyle} }
                                 /* Override container styles for full width */
                                 div { 
                                     max-width: 100% !important; 
@@ -6665,7 +7425,7 @@
                                     margin: 0 !important; 
                                 }
                             }
-                            body { font-family: Arial, sans-serif; padding: 20px; }
+                            body { font-family: Arial, sans-serif; padding: 20px; ${settings.receiptSize !== 'A4' ? 'width: ' + settings.receiptSize + '; margin: 0 auto;' : ''} }
                             table { width: 100%; border-collapse: collapse; }
                             th, td { padding: 4px; text-align: left; border-bottom: 1px solid #ddd; font-size: 12px; }
                             th { background-color: #f2f2f2; }
@@ -6720,9 +7480,10 @@
             }
 
             const date = new Date(lastSaleData.date);
+            const settings = JSON.parse(localStorage.getItem('settings') || 'null') || getDefaultSettings();
 
             // Format Receipt as text message
-            let message = `🧾 * Sales Receipt *\n\n`;
+            let message = `🧾 * ${settings.businessName || 'Sales Receipt'} *\n\n`;
             message += `* Receipt #:* ${lastSaleData.receiptNumber} \n`;
             message += `* Date:* ${date.toLocaleDateString()} \n`;
             message += `* Time:* ${date.toLocaleTimeString()} \n`;
@@ -6764,7 +7525,7 @@
                 }
             }
 
-            message += `\nThank you for your purchase! 🙏`;
+            message += `\n${settings.footerMsg || 'Thank you for your purchase! 🙏'}`;
 
             // Encode message for URL
             const encodedMessage = encodeURIComponent(message);
@@ -6979,6 +7740,7 @@
         }
 
         function searchBill() {
+            const settings = JSON.parse(localStorage.getItem('settings') || 'null') || getDefaultSettings();
             const billNumber = document.getElementById('billSearchInput').value.trim();
             const container = document.getElementById('billDetailsContainer');
 
@@ -7021,28 +7783,50 @@
             discount = firstItem.discount || 0;
             total = subtotal - discount;
 
+            let isInterState = false;
+            billItems.forEach(item => {
+                if (item.taxType === 'inter') isInterState = true;
+            });
+
             // Build items table
             let itemsHTML = `
                 <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
                     <thead>
                         <tr style="background: #007bff; color: white;">
                             <th style="padding: 10px; text-align: left; border: 1px solid #dee2e6;">Product</th>
-                            <th style="padding: 10px; text-align: center; border: 1px solid #dee2e6;">Unit</th>
-                            <th style="padding: 10px; text-align: center; border: 1px solid #dee2e6;">Quantity</th>
-                            <th style="padding: 10px; text-align: right; border: 1px solid #dee2e6;">Unit Price</th>
+                            ${settings.gstEnabled ? '<th style="padding: 10px; text-align: left; border: 1px solid #dee2e6;">HSN</th>' : ''}
+                            <th style="padding: 10px; text-align: center; border: 1px solid #dee2e6;">Qty</th>
+                            <th style="padding: 10px; text-align: right; border: 1px solid #dee2e6;">Rate</th>
+                            ${settings.gstEnabled ? (isInterState ? 
+                                '<th style="padding: 10px; text-align: right; border: 1px solid #dee2e6;">IGST</th>' : 
+                                '<th style="padding: 10px; text-align: right; border: 1px solid #dee2e6;">CGST</th><th style="padding: 10px; text-align: right; border: 1px solid #dee2e6;">SGST</th>'
+                            ) : ''}
+                            <th style="padding: 10px; text-align: right; border: 1px solid #dee2e6;">Disc</th>
                             <th style="padding: 10px; text-align: right; border: 1px solid #dee2e6;">Total</th>
                         </tr>
                     </thead>
                     <tbody>
             `;
 
+            let totalTaxable = 0, totalCGST = 0, totalSGST = 0, totalIGST = 0;
+
             billItems.forEach(item => {
+                totalTaxable += item.taxableValue || 0;
+                totalCGST += item.cgst || 0;
+                totalSGST += item.sgst || 0;
+                totalIGST += item.igst || 0;
+                
                 itemsHTML += `
                     <tr style="border-bottom: 1px solid #dee2e6;">
                         <td style="padding: 10px; border: 1px solid #dee2e6;">${item.productName}</td>
-                        <td style="padding: 10px; text-align: center; border: 1px solid #dee2e6;">${item.unit || 'Piece'}</td>
+                        ${settings.gstEnabled ? `<td style="padding: 10px; border: 1px solid #dee2e6;">${item.hsn || ''}</td>` : ''}
                         <td style="padding: 10px; text-align: center; border: 1px solid #dee2e6;">${item.quantity}</td>
                         <td style="padding: 10px; text-align: right; border: 1px solid #dee2e6;">₹${item.price.toFixed(2)}</td>
+                        ${settings.gstEnabled ? (isInterState ? 
+                            `<td style="padding: 10px; text-align: right; border: 1px solid #dee2e6;">₹${(item.igst || 0).toFixed(2)}</td>` : 
+                            `<td style="padding: 10px; text-align: right; border: 1px solid #dee2e6;">₹${(item.cgst || 0).toFixed(2)}</td><td style="padding: 10px; text-align: right; border: 1px solid #dee2e6;">₹${(item.sgst || 0).toFixed(2)}</td>`
+                        ) : ''}
+                        <td style="padding: 10px; text-align: right; border: 1px solid #dee2e6;">₹${(item.itemDiscount || 0).toFixed(2)}</td>
                         <td style="padding: 10px; text-align: right; border: 1px solid #dee2e6;">₹${item.total.toFixed(2)}</td>
                     </tr>
                 `;
@@ -7052,6 +7836,23 @@
                     </tbody>
                 </table>
             `;
+
+            let gstSummaryHTML = '';
+            if (settings.gstEnabled) {
+                gstSummaryHTML = `
+                    <div style="margin-top: 20px; padding: 15px; border: 1px solid #dee2e6; border-radius: 4px; background: #f8f9fa;">
+                        <h4 style="margin: 0 0 10px 0; color: #007bff;">📊 Tax Summary</h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <div><strong>Total Taxable Value:</strong> ₹${totalTaxable.toFixed(2)}</div>
+                            ${isInterState ? 
+                                `<div><strong>Total IGST:</strong> ₹${totalIGST.toFixed(2)}</div>` : 
+                                `<div><strong>Total CGST:</strong> ₹${totalCGST.toFixed(2)}</div><div><strong>Total SGST:</strong> ₹${totalSGST.toFixed(2)}</div>`
+                            }
+                        </div>
+                        ${settings.gstin ? `<div style="margin-top: 10px; font-size: 0.9em; color: #666;"><strong>GSTIN:</strong> ${settings.gstin}</div>` : ''}
+                    </div>
+                `;
+            }
 
             // Display bill details
             container.style.display = 'block';
@@ -7074,6 +7875,7 @@
 
                 <h4 style="margin: 20px 0 10px 0; color: #007bff;">🛒 Items Purchased</h4>
                 ${itemsHTML}
+                ${gstSummaryHTML}
 
                 <div style="margin-top: 20px; text-align: right; display: flex; gap: 10px; justify-content: flex-end;">
                     <button class="btn btn-primary" onclick="printBillDetails('${billNumber}')">🖨️ Print Bill</button>
@@ -7559,26 +8361,37 @@
             let totalSubtotal = 0;
             let totalDiscount = 0;
             let totalSalesAfterDiscount = 0;
+            let totalTaxableValue = 0;
+            let totalCGST = 0;
+            let totalSGST = 0;
+            let totalIGST = 0;
 
             Object.values(uniqueSales).forEach(saleGroup => {
                 // If subtotal/discount not in data, calculate from items
                 if (saleGroup.subtotal === 0) {
-                    saleGroup.subtotal = saleGroup.items.reduce((sum, item) => sum + item.total, 0);
+                    saleGroup.subtotal = saleGroup.items.reduce((sum, item) => sum + (item.finalTotal !== undefined ? item.finalTotal : item.total), 0);
                 }
 
                 totalSubtotal += saleGroup.subtotal;
                 totalDiscount += saleGroup.discount;
                 totalSalesAfterDiscount += saleGroup.subtotal - saleGroup.discount;
+                
+                saleGroup.items.forEach(item => {
+                    totalTaxableValue += item.taxableValue || 0;
+                    totalCGST += item.cgst || 0;
+                    totalSGST += item.sgst || 0;
+                    totalIGST += item.igst || 0;
+                });
             });
 
             // Calculate product totals (after discount)
-            const totalSales = filteredSales.reduce((sum, sale) => sum + sale.total, 0);
+            const totalSales = filteredSales.reduce((sum, sale) => sum + (sale.finalTotal !== undefined ? sale.finalTotal : sale.total), 0);
             const uniqueSaleCount = Object.keys(uniqueSales).length;
             const avgTransaction = uniqueSaleCount > 0 ? totalSalesAfterDiscount / uniqueSaleCount : 0;
 
             const productSales = {};
             filteredSales.forEach(sale => {
-                productSales[sale.productName] = (productSales[sale.productName] || 0) + sale.total;
+                productSales[sale.productName] = (productSales[sale.productName] || 0) + (sale.finalTotal !== undefined ? sale.finalTotal : sale.total);
             });
 
             const topProduct = Object.keys(productSales).length > 0
@@ -7592,6 +8405,12 @@
             const reportTransactionsEl = document.getElementById('reportTransactions');
             const reportAvgTransactionEl = document.getElementById('reportAvgTransaction');
             const reportTopProductEl = document.getElementById('reportTopProduct');
+            
+            // GST Fields
+            const reportTaxableValueEl = document.getElementById('reportTaxableValue');
+            const reportTotalCGSTEl = document.getElementById('reportTotalCGST');
+            const reportTotalSGSTEl = document.getElementById('reportTotalSGST');
+            const reportTotalIGSTEl = document.getElementById('reportTotalIGST');
 
             if (reportTotalSalesEl) {
                 reportTotalSalesEl.textContent = '₹' + totalSalesAfterDiscount.toFixed(2);
@@ -7599,6 +8418,10 @@
             if (reportTotalDiscountEl) {
                 reportTotalDiscountEl.textContent = '₹' + totalDiscount.toFixed(2);
             }
+            if (reportTaxableValueEl) reportTaxableValueEl.textContent = '₹' + totalTaxableValue.toFixed(2);
+            if (reportTotalCGSTEl) reportTotalCGSTEl.textContent = '₹' + totalCGST.toFixed(2);
+            if (reportTotalSGSTEl) reportTotalSGSTEl.textContent = '₹' + totalSGST.toFixed(2);
+            if (reportTotalIGSTEl) reportTotalIGSTEl.textContent = '₹' + totalIGST.toFixed(2);
             if (reportTransactionsEl) {
                 reportTransactionsEl.textContent = uniqueSaleCount;
             }
@@ -7837,6 +8660,9 @@
             let oldTotalRevenue = 0;
             const uniqueOldSales = {}; 
 
+            const settings = JSON.parse(localStorage.getItem('settings') || 'null') || getDefaultSettings();
+            const gstEnabled = settings.gstEnabled === true;
+
             // First, collect unique OLD sales to calculate their total old discount
             sales.forEach(sale => {
                 if (!sale.hasOwnProperty('billDiscount')) {
@@ -7859,12 +8685,23 @@
                         units: 0,
                         revenue: 0,
                         exactDiscount: 0,
-                        oldRevenue: 0
+                        oldRevenue: 0,
+                        taxableValue: 0,
+                        cgst: 0,
+                        sgst: 0,
+                        igst: 0
                     };
                 }
                 productSales[sale.productName].units += sale.quantity;
-                productSales[sale.productName].revenue += sale.total;
-                totalRevenue += sale.total;
+                const saleTotal = sale.finalTotal !== undefined ? sale.finalTotal : sale.total;
+                productSales[sale.productName].revenue += saleTotal;
+                
+                productSales[sale.productName].taxableValue += sale.taxableValue || 0;
+                productSales[sale.productName].cgst += sale.cgst || 0;
+                productSales[sale.productName].sgst += sale.sgst || 0;
+                productSales[sale.productName].igst += sale.igst || 0;
+                
+                totalRevenue += saleTotal;
                 
                 if (sale.hasOwnProperty('billDiscount')) {
                     productSales[sale.productName].exactDiscount += (sale.discount || 0);
@@ -7879,7 +8716,8 @@
             const tbody = document.getElementById('productWiseSales');
 
             if (Object.keys(productSales).length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #6c757d;">No sales data available</td></tr>';
+                const colSpan = gstEnabled ? "9" : "5";
+                tbody.innerHTML = `<tr><td colspan="${colSpan}" style="text-align: center; color: #6c757d;">No sales data available</td></tr>`;
                 return;
             }
 
@@ -7895,6 +8733,10 @@
                         <tr>
                             <td>${product}</td>
                             <td>${data.units}</td>
+                            ${gstEnabled ? `<td style="text-align: right;">₹${data.taxableValue.toFixed(2)}</td>` : ''}
+                            ${gstEnabled ? `<td style="text-align: right;">₹${data.cgst.toFixed(2)}</td>` : ''}
+                            ${gstEnabled ? `<td style="text-align: right;">₹${data.sgst.toFixed(2)}</td>` : ''}
+                            ${gstEnabled ? `<td style="text-align: right;">₹${data.igst.toFixed(2)}</td>` : ''}
                             <td>₹${data.revenue.toFixed(2)}</td>
                             <td>₹${finalProductDiscount.toFixed(2)}</td>
                             <td>${percentage}%</td>
@@ -7907,6 +8749,10 @@
                 <tr style="font-weight: bold; border-top: 2px solid #333; background: #f8f9fa;">
                     <td>Total</td>
                     <td>${Object.values(productSales).reduce((sum, p) => sum + p.units, 0)}</td>
+                    ${gstEnabled ? `<td style="text-align: right;">₹${Object.values(productSales).reduce((sum, p) => sum + p.taxableValue, 0).toFixed(2)}</td>` : ''}
+                    ${gstEnabled ? `<td style="text-align: right;">₹${Object.values(productSales).reduce((sum, p) => sum + p.cgst, 0).toFixed(2)}</td>` : ''}
+                    ${gstEnabled ? `<td style="text-align: right;">₹${Object.values(productSales).reduce((sum, p) => sum + p.sgst, 0).toFixed(2)}</td>` : ''}
+                    ${gstEnabled ? `<td style="text-align: right;">₹${Object.values(productSales).reduce((sum, p) => sum + p.igst, 0).toFixed(2)}</td>` : ''}
                     <td>₹${totalRevenue.toFixed(2)}</td>
                     <td>₹${totalDiscount.toFixed(2)}</td>
                     <td>100%</td>
@@ -8670,6 +9516,24 @@
             }
 
             document.getElementById('editProductPrice').value = product.price;
+
+            const editHsnEl = document.getElementById('editProductHSN');
+            if (editHsnEl) editHsnEl.value = product.hsn || '';
+            
+            const editGstEl = document.getElementById('editProductGSTRate');
+            const editCustomGstEl = document.getElementById('editProductCustomGSTRate');
+            if (editGstEl && editCustomGstEl) {
+                let gstVal = product.gstRate || 0;
+                if ([0, 5, 12, 18, 28].includes(gstVal)) {
+                    editGstEl.value = gstVal;
+                    editCustomGstEl.style.display = 'none';
+                } else {
+                    editGstEl.value = 'custom';
+                    editCustomGstEl.value = gstVal;
+                    editCustomGstEl.style.display = 'block';
+                }
+            }
+
             document.getElementById('editProductStock').value = product.stock;
             document.getElementById('editProductMinStock').value = product.minStock;
             document.getElementById('editProductSupplier').value = product.supplier || '';
@@ -8746,6 +9610,18 @@
                 product.category = categoryValue;
                 product.unit = document.getElementById('editProductUnit').value;
                 product.price = parseFloat(document.getElementById('editProductPrice').value);
+                
+                const hsnEl = document.getElementById('editProductHSN');
+                product.hsn = hsnEl ? hsnEl.value : '';
+
+                const gstRateEl = document.getElementById('editProductGSTRate');
+                let gstRate = gstRateEl ? gstRateEl.value : '0';
+                if (gstRate === 'custom') {
+                    const customGstEl = document.getElementById('editProductCustomGSTRate');
+                    gstRate = customGstEl ? customGstEl.value : '0';
+                }
+                product.gstRate = parseFloat(gstRate) || 0;
+
                 product.stock = parseInt(document.getElementById('editProductStock').value);
                 product.minStock = parseInt(document.getElementById('editProductMinStock').value);
                 product.supplier = document.getElementById('editProductSupplier').value || 'N/A';
@@ -10608,7 +11484,7 @@
             XLSX.utils.book_append_sheet(wb, ws, "Day Closing History");
             
             const today = new Date().toISOString().split('T')[0];
-            XLSX.writeFile(wb, `Doodles_Store_Day_Closing_${today}.xlsx`);
+            XLSX.writeFile(wb, `salesapp_Store_Day_Closing_${today}.xlsx`);
         }
 
         function renderDayClosingHistory() {
@@ -11018,6 +11894,410 @@
             </div>
         </div>
     </div>
+    <script>
+        // Settings Module Logic
+        function getDefaultSettings() {
+            return {
+                businessName: 'Business Name',
+                tagline: 'Inventory & Sales System',
+                logoData: null,
+                mobile: '',
+                email: '',
+                website: '',
+                address: '',
+                gstin: '',
+                receiptSize: '80mm',
+                autoPrint: false,
+                footerMsg: 'Thank you for your purchase!',
+                showCustomer: true,
+                showDiscount: true,
+                showPayment: true,
+                gstEnabled: false,
+                businessState: '',
+                taxPricingMode: 'exclusive',
+                defaultTaxType: 'auto',
+                showGST: false,
+                showBarcode: false,
+                adminPassword: 'Admin@2026'
+            };
+        }
+
+        function loadSettings() {
+            const savedSettings = JSON.parse(localStorage.getItem('settings') || 'null');
+            const settings = { ...getDefaultSettings(), ...savedSettings };
+
+            const businessNameInput = document.getElementById('settingsBusinessName');
+            if (businessNameInput) businessNameInput.value = settings.businessName || '';
+            const taglineInput = document.getElementById('settingsTagline');
+            if (taglineInput) taglineInput.value = settings.tagline || '';
+            
+            const logoPreview = document.getElementById('settingsLogoPreview');
+            const removeLogoBtn = document.getElementById('settingsRemoveLogoBtn');
+            if (logoPreview && removeLogoBtn) {
+                if (settings.logoData) {
+                    logoPreview.src = settings.logoData;
+                    logoPreview.style.display = 'block';
+                    removeLogoBtn.style.display = 'inline-block';
+                } else {
+                    logoPreview.style.display = 'none';
+                    removeLogoBtn.style.display = 'none';
+                }
+            }
+            const mobileInput = document.getElementById('settingsMobile');
+            if (mobileInput) mobileInput.value = settings.mobile || '';
+            const emailInput = document.getElementById('settingsEmail');
+            if (emailInput) emailInput.value = settings.email || '';
+            const websiteInput = document.getElementById('settingsWebsite');
+            if (websiteInput) websiteInput.value = settings.website || '';
+            const addressInput = document.getElementById('settingsAddress');
+            if (addressInput) addressInput.value = settings.address || '';
+            const gstinInput = document.getElementById('settingsGSTIN');
+            if (gstinInput) gstinInput.value = settings.gstin || '';
+
+            const receiptSizeInput = document.getElementById('settingsReceiptSize');
+            if (receiptSizeInput) receiptSizeInput.value = settings.receiptSize;
+            const autoPrintInput = document.getElementById('settingsAutoPrint');
+            if (autoPrintInput) autoPrintInput.checked = settings.autoPrint;
+
+            const footerMsgInput = document.getElementById('settingsFooterMsg');
+            if (footerMsgInput) footerMsgInput.value = settings.footerMsg || '';
+            const showCustomerInput = document.getElementById('settingsShowCustomer');
+            if (showCustomerInput) showCustomerInput.checked = settings.showCustomer;
+            const showDiscountInput = document.getElementById('settingsShowDiscount');
+            if (showDiscountInput) showDiscountInput.checked = settings.showDiscount;
+            const showPaymentInput = document.getElementById('settingsShowPayment');
+            if (showPaymentInput) showPaymentInput.checked = settings.showPayment;
+            const showGSTInput = document.getElementById('settingsShowGST');
+            if (showGSTInput) showGSTInput.checked = settings.showGST;
+            const showBarcodeInput = document.getElementById('settingsShowBarcode');
+            if (showBarcodeInput) showBarcodeInput.checked = settings.showBarcode;
+            
+            const gstEnabledInput = document.getElementById('settingsGSTEnabled');
+            if (gstEnabledInput) gstEnabledInput.checked = settings.gstEnabled;
+
+            const businessStateInput = document.getElementById('settingsBusinessState');
+            if (businessStateInput) businessStateInput.value = settings.businessState || '';
+
+            const taxPricingModeInput = document.getElementById('settingsTaxPricingMode');
+            if (taxPricingModeInput) taxPricingModeInput.value = settings.taxPricingMode || 'exclusive';
+
+            const defaultTaxTypeInput = document.getElementById('settingsDefaultTaxType');
+            if (defaultTaxTypeInput) defaultTaxTypeInput.value = settings.defaultTaxType || 'auto';
+
+            // Update UI dynamically
+            applySettingsToUI(settings);
+        }
+
+        function saveSettings() {
+            const currentSettings = JSON.parse(localStorage.getItem('settings') || 'null') || getDefaultSettings();
+            
+            const bName = document.getElementById('settingsBusinessName');
+            if(bName) currentSettings.businessName = bName.value;
+            const tagline = document.getElementById('settingsTagline');
+            if(tagline) currentSettings.tagline = tagline.value;
+            const mob = document.getElementById('settingsMobile');
+            if(mob) currentSettings.mobile = mob.value;
+            const eml = document.getElementById('settingsEmail');
+            if(eml) currentSettings.email = eml.value;
+            const website = document.getElementById('settingsWebsite');
+            if(website) currentSettings.website = website.value;
+            const addr = document.getElementById('settingsAddress');
+            if(addr) currentSettings.address = addr.value;
+            const gst = document.getElementById('settingsGSTIN');
+            if(gst) currentSettings.gstin = gst.value;
+
+            const rSize = document.getElementById('settingsReceiptSize');
+            if(rSize) currentSettings.receiptSize = rSize.value;
+            const aPrint = document.getElementById('settingsAutoPrint');
+            if(aPrint) currentSettings.autoPrint = aPrint.checked;
+
+            const fMsg = document.getElementById('settingsFooterMsg');
+            if(fMsg) currentSettings.footerMsg = fMsg.value;
+            
+            const sCust = document.getElementById('settingsShowCustomer');
+            if(sCust) currentSettings.showCustomer = sCust.checked;
+            const sDisc = document.getElementById('settingsShowDiscount');
+            if(sDisc) currentSettings.showDiscount = sDisc.checked;
+            const sPay = document.getElementById('settingsShowPayment');
+            if(sPay) currentSettings.showPayment = sPay.checked;
+            const sGST = document.getElementById('settingsShowGST');
+            if(sGST) currentSettings.showGST = sGST.checked;
+            const sBar = document.getElementById('settingsShowBarcode');
+            if(sBar) currentSettings.showBarcode = sBar.checked;
+            
+            const gstEnabled = document.getElementById('settingsGSTEnabled');
+            if(gstEnabled) currentSettings.gstEnabled = gstEnabled.checked;
+
+            const businessState = document.getElementById('settingsBusinessState');
+            if(businessState) currentSettings.businessState = businessState.value;
+
+            const taxPricingMode = document.getElementById('settingsTaxPricingMode');
+            if(taxPricingMode) currentSettings.taxPricingMode = taxPricingMode.value;
+
+            const defaultTaxType = document.getElementById('settingsDefaultTaxType');
+            if(defaultTaxType) currentSettings.defaultTaxType = defaultTaxType.value;
+
+            localStorage.setItem('settings', JSON.stringify(currentSettings));
+            showAlert('Settings saved successfully!', '✅');
+            applySettingsToUI(currentSettings);
+        }
+
+        function applySettingsToUI(settings) {
+            const bName = settings.businessName || 'Business Name';
+            const tagline = settings.tagline || 'Inventory & Sales System';
+            
+            document.title = bName + ' - ' + tagline;
+            
+            const headerTitle = document.getElementById('headerTitle');
+            if (headerTitle) headerTitle.innerText = bName;
+            
+            const headerTagline = document.getElementById('headerTagline');
+            if (headerTagline) headerTagline.innerText = tagline;
+            
+            const headerLogo = document.getElementById('headerLogo');
+            if (headerLogo) {
+                if (settings.logoData) {
+                    headerLogo.src = settings.logoData;
+                    headerLogo.style.display = 'block';
+                } else {
+                    headerLogo.style.display = 'none';
+                }
+            }
+
+            const h1 = document.querySelector('.sidebar h1');
+            if (h1) h1.innerText = bName;
+
+            const showGSTInput = document.getElementById('settingsShowGST');
+            if (showGSTInput) {
+                showGSTInput.disabled = !settings.gstEnabled;
+                if (!settings.gstEnabled) showGSTInput.checked = false;
+            }
+            
+            const gstExtendedSettings = document.getElementById('gstExtendedSettings');
+            if (gstExtendedSettings) {
+                gstExtendedSettings.style.display = settings.gstEnabled ? 'block' : 'none';
+            }
+            const gstinInput = document.getElementById('settingsGSTIN');
+            if (gstinInput) {
+                gstinInput.disabled = !settings.gstEnabled;
+            }
+            
+            // Toggle all GST fields globally
+            document.querySelectorAll('.gst-field').forEach(el => {
+                if (settings.gstEnabled) {
+                    if (el.tagName === 'TH' || el.tagName === 'TD') {
+                        el.style.display = 'table-cell';
+                    } else {
+                        el.style.display = 'block';
+                    }
+                } else {
+                    el.style.display = 'none';
+                }
+            });
+        }
+
+        function handleLogoUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const max_size = 200;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > max_size) {
+                            height *= max_size / width;
+                            width = max_size;
+                        }
+                    } else {
+                        if (height > max_size) {
+                            width *= max_size / height;
+                            height = max_size;
+                        }
+                    }
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    const dataUrl = canvas.toDataURL('image/png', 0.8);
+                    
+                    document.getElementById('settingsLogoPreview').src = dataUrl;
+                    document.getElementById('settingsLogoPreview').style.display = 'block';
+                    document.getElementById('settingsRemoveLogoBtn').style.display = 'inline-block';
+                    
+                    const currentSettings = JSON.parse(localStorage.getItem('settings') || 'null') || getDefaultSettings();
+                    currentSettings.logoData = dataUrl;
+                    localStorage.setItem('settings', JSON.stringify(currentSettings));
+                    
+                    applySettingsToUI(currentSettings);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removeLogo() {
+            document.getElementById('settingsLogoPreview').style.display = 'none';
+            document.getElementById('settingsLogoPreview').src = '';
+            document.getElementById('settingsRemoveLogoBtn').style.display = 'none';
+            document.getElementById('settingsLogoInput').value = '';
+            
+            const currentSettings = JSON.parse(localStorage.getItem('settings') || 'null') || getDefaultSettings();
+            currentSettings.logoData = null;
+            localStorage.setItem('settings', JSON.stringify(currentSettings));
+            
+            applySettingsToUI(currentSettings);
+        }
+
+        function changeAdminPassword() {
+            const currentSettings = JSON.parse(localStorage.getItem('settings') || 'null') || getDefaultSettings();
+            const currentPwd = document.getElementById('settingsCurrentPwd').value;
+            const newPwd = document.getElementById('settingsNewPwd').value;
+            const confirmPwd = document.getElementById('settingsConfirmPwd').value;
+
+            if (currentPwd !== currentSettings.adminPassword) {
+                showAlert('Incorrect current password.', '❌');
+                return;
+            }
+            if (newPwd !== confirmPwd) {
+                showAlert('New password and confirm password do not match.', '❌');
+                return;
+            }
+            if (!newPwd) {
+                showAlert('Password cannot be empty.', '⚠️');
+                return;
+            }
+
+            currentSettings.adminPassword = newPwd;
+            localStorage.setItem('settings', JSON.stringify(currentSettings));
+            showAlert('Admin password changed successfully!', '✅');
+            
+            document.getElementById('settingsCurrentPwd').value = '';
+            document.getElementById('settingsNewPwd').value = '';
+            document.getElementById('settingsConfirmPwd').value = '';
+        }
+
+        function createBackup() {
+            if (!window.electronAPI) {
+                showAlert('Backup is only supported in the desktop app.', '⚠️');
+                return;
+            }
+            
+            const folder = localStorage.getItem('database_folder');
+            if (!folder) {
+                showAlert('Database folder not selected.', '⚠️');
+                return;
+            }
+
+            const data = JSON.stringify(localStorage);
+            const date = new Date().toISOString().replace(/[:.]/g, '-');
+            const result = window.electronAPI.createBackupSync({
+                folder: folder,
+                filename: `shermon_backup_${date}.json`,
+                data: data
+            });
+
+            if (result.success) {
+                showAlert('Backup created successfully!', '✅');
+                document.getElementById('lastBackupLabel').innerText = 'Last Backup: ' + new Date().toLocaleString();
+            } else {
+                showAlert('Failed to create backup: ' + result.error, '❌');
+            }
+        }
+
+        function handleRestoreBackup(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (confirm('Restoring a backup will replace the current application data with the selected backup. Are you sure you want to proceed?')) {
+                        localStorage.clear();
+                        for (let key in data) {
+                            localStorage.setItem(key, data[key]);
+                        }
+                        alert('Backup restored successfully! Application will now reload.');
+                        window.location.reload();
+                    }
+                } catch (error) {
+                    showAlert('Invalid backup file.', '❌');
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = ''; // Reset input
+        }
+
+        function exportSalesExcelXLSX() {
+            if (typeof XLSX === 'undefined') {
+                showAlert('Excel library not loaded.', '⚠️');
+                return;
+            }
+            const sales = JSON.parse(localStorage.getItem('sales') || '[]');
+            if (sales.length === 0) {
+                showAlert('No sales data to export', '⚠️');
+                return;
+            }
+
+            const exportData = sales.flatMap(sale => {
+                return sale.items.map(item => ({
+                    'Date': new Date(sale.date).toLocaleString(),
+                    'Invoice/Sale Number': sale.receiptNumber,
+                    'Product': item.productName,
+                    'Quantity': item.quantity,
+                    'Unit Price': item.price,
+                    'Discount': (sale.discount || 0) / sale.items.length, // Distribute roughly
+                    'Total': item.total,
+                    'Customer': sale.customerName || 'Walk-in',
+                    'Payment Method': sale.paymentMethod
+                }));
+            });
+
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Sales");
+            XLSX.writeFile(wb, "Sales_Export.xlsx");
+        }
+
+        function exportInventoryExcelXLSX() {
+            if (typeof XLSX === 'undefined') {
+                showAlert('Excel library not loaded.', '⚠️');
+                return;
+            }
+            const products = JSON.parse(localStorage.getItem('products') || '[]');
+            if (products.length === 0) {
+                showAlert('No inventory data to export', '⚠️');
+                return;
+            }
+
+            const exportData = products.map(p => ({
+                'Product Name': p.name,
+                'Barcode': p.barcode,
+                'Category': p.category,
+                'Unit/Pack': p.unit,
+                'Purchase Price': p.costPrice || p.price,
+                'Selling Price': p.price,
+                'Current Stock': p.stock,
+                'Minimum Stock': p.minStock || 0
+            }));
+
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Inventory");
+            XLSX.writeFile(wb, "Inventory_Export.xlsx");
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSettings();
+        });
+    </script>
 </body>
 
 </html>

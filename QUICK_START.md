@@ -36,7 +36,7 @@ If this is your first deployment, you'll need to:
    firebase init hosting
    ```
    - Choose "Use an existing project"
-   - Select "doodles-store"
+   - Select "sales-app"
    - Use "public" as the public directory
    - Say "No" to single-page app
    - Say "No" to GitHub auto-deploy
@@ -53,8 +53,8 @@ See [DEPLOYMENT.md](file:///Users/log/Desktop/SalesApp/DEPLOYMENT.md) for detail
 ## After Deployment
 
 Your app will be live at:
-- **https://doodles-store.web.app**
-- **https://doodles-store.firebaseapp.com**
+- **https://sales-app.web.app**
+- **https://sales-app.firebaseapp.com**
 
 ### Important: Update Security Rules
 

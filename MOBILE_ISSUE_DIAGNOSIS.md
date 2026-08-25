@@ -6,7 +6,7 @@ Your app is completely frozen on mobile because **Firebase Authentication is blo
 
 ## Quick Test - Does Desktop Work?
 
-1. Open https://doodles-store.web.app on your **computer**
+1. Open https://sales-app.web.app on your **computer**
 2. Can you click and interact with it on desktop?
 
 **If YES:** The code is fine, it's a mobile-specific issue
@@ -35,7 +35,7 @@ Would you like me to:
 ## Quick Firebase Setup (If you want to try)
 
 1. Go to: https://console.firebase.google.com
-2. Select "Doodles-Store" project
+2. Select "salesapp-Store" project
 3. Click "Authentication" → "Get Started"
 4. Enable "Email/Password"
 5. Click "Users" → "Add User"

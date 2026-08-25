@@ -7,9 +7,9 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Doodles Store">
+    <meta name="apple-mobile-web-app-title" content="Sales App">
     <meta name="theme-color" content="#f12711">
-    <meta name="description" content="Inventory & Sales Management System for Doodles Stationery Store">
+    <meta name="description" content="Inventory & Sales Management System for salesapp Stationery Store">
 
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json">
@@ -19,7 +19,7 @@
     <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png">
     <link rel="apple-touch-icon" href="/icon-192.png">
 
-    <title>Doodles Store - Inventory & Sales</title>
+    <title>Sales App - Inventory & Sales</title>
     <!-- Include Html5-QRCode library for barcode scanning -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
@@ -991,7 +991,7 @@
         <div class="header">
             <div class="responsive-header" style="display: flex; justify-content: space-between; align-items: center;">
                 <div>
-                    <h1>Doodles Store</h1>
+                    <h1>Sales App</h1>
                     <p>Inventory & Sales System</p>
                 </div>
                 <div style="text-align: right; width: 100%; display: flex; flex-direction: column; align-items: flex-end;"
@@ -2879,7 +2879,7 @@
 
             // Format filename with date
             const dateStr = new Date().toISOString().split('T')[0];
-            link.download = `doodles-backup-${dateStr}.json`;
+            link.download = `sales-backup-${dateStr}.json`;
 
             // Trigger download
             document.body.appendChild(link);
@@ -2887,7 +2887,7 @@
             document.body.removeChild(link);
             URL.revokeObjectURL(url);
 
-            showAlert('✅ Backup downloaded successfully!<br>File: doodles-backup-' + dateStr + '.json', '💾');
+            showAlert('✅ Backup downloaded successfully!<br>File: sales-backup-' + dateStr + '.json', '💾');
         }
 
         function restoreData(event) {

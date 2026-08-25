@@ -66,10 +66,10 @@ function generateUUID() {
 // Session State
 // Session State
 // FIX: Persist Session ID so reloads don't kill the session
-let currentSessionId = sessionStorage.getItem('doodlesSessionId');
+let currentSessionId = sessionStorage.getItem('salesSessionId');
 if (!currentSessionId) {
     currentSessionId = generateUUID();
-    sessionStorage.setItem('doodlesSessionId', currentSessionId);
+    sessionStorage.setItem('salesSessionId', currentSessionId);
 }
 let sessionHeartbeatInterval = null;
 let sessionListenerUnsubscribe = null;

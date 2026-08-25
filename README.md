@@ -1,11 +1,11 @@
-# Doodles Store - Inventory & Sales Management System
+# Sales App - Inventory & Sales Management System
 
 Complete inventory and sales management system with Firebase cloud sync and PWA support.
 
 ## 🚀 Live Application
 
-- **Main URL:** https://doodles-store.web.app
-- **Alternative:** https://doodles-store.firebaseapp.com
+- **Main URL:** https://sales-app.web.app
+- **Alternative:** https://sales-app.firebaseapp.com
 
 ## 📋 Features
 
@@ -58,7 +58,7 @@ SalesApp/
 ### Prerequisites
 - Node.js and npm installed
 - Firebase CLI installed (`npm install -g firebase-tools`)
-- Firebase project created (doodles-store)
+- Firebase project created (sales-app)
 
 ### Initial Setup
 
@@ -117,13 +117,13 @@ const ADMIN_PASSWORD = 'your-new-password'; // Change this
 ## 📱 PWA Installation
 
 ### Android
-1. Visit https://doodles-store.web.app
+1. Visit https://sales-app.web.app
 2. Tap browser menu (⋮)
 3. Select "Add to Home screen"
 4. Tap "Install"
 
 ### iOS
-1. Visit https://doodles-store.web.app in Safari
+1. Visit https://sales-app.web.app in Safari
 2. Tap Share button (□↑)
 3. Scroll and tap "Add to Home Screen"
 4. Tap "Add"
@@ -154,7 +154,7 @@ This project can be converted into a native Windows executable (`.exe`) file usi
    npm run dist -- --win
    ```
 5. The compiled file will be saved in the `dist/` folder.
-   - **Current Output File:** `doodles-store-desktop Setup 1.7.0.exe`
+   - **Current Output File:** `sales-app-desktop Setup 1.7.0.exe`
 
 ### How to generate the macOS .dmg file:
 1. Ensure you have Node.js installed on a Mac.
@@ -163,7 +163,7 @@ This project can be converted into a native Windows executable (`.exe`) file usi
    npm run dist -- --mac
    ```
 3. The compiled file will be saved in the `dist/` folder.
-   - **Current Output File:** `doodles-store-desktop-1.7.0-arm64.dmg`
+   - **Current Output File:** `sales-app-desktop-1.7.0-arm64.dmg`
 
 ## ⌨️ Global Keyboard Shortcuts
 
@@ -194,13 +194,13 @@ The application is optimized for rapid POS navigation.
 ## 🔑 Default Credentials
 
 **Admin User:**
-- **Email:** `admin@doodlesstore.in`
-- **Password:** `Doodles@2026`
+- **Email:** `admin@example.com`
+- **Password:** `Admin@2026`
 - **Features:** Full access including deleting records and configuring cost prices.
 
 **Standard User:**
-- **Email:** `user@doodlesstore.in`
-- **Password:** `Doodles@123`
+- **Email:** `user@example.com`
+- **Password:** `User@123`
 - **Features:** Standard POS operations, cannot delete history or manage sensitive data.
 
 ## 🚀 Deployment
@@ -374,8 +374,8 @@ Potential features to add:
 
 ## 📞 Quick Reference
 
-- **Live App:** https://doodles-store.web.app
-- **Firebase Console:** https://console.firebase.google.com/project/doodles-store
+- **Live App:** https://sales-app.web.app
+- **Firebase Console:** https://console.firebase.google.com/project/sales-app
 - **Admin Password:** `admin123` (change this!)
 - **Deployment:** `./deploy.sh`
 
@@ -393,4 +393,4 @@ Potential features to add:
 
 **Last Updated:** November 25, 2025  
 **Version:** 1.0  
-**Project:** Doodles Store Inventory & Sales Management System
+**Project:** Sales App Inventory & Sales Management System

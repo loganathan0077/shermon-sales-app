@@ -1,7 +1,7 @@
 {
-  "name": "Doodles Store",
-  "short_name": "Doodles",
-  "description": "Inventory & Sales Management System for Doodles Stationery Store",
+  "name": "Sales App",
+  "short_name": "salesapp",
+  "description": "Inventory & Sales Management System for salesapp Stationery Store",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f5af19",

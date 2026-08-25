@@ -1,6 +1,6 @@
-# Installing Doodles Store as a Mobile App 📱
+# Installing Sales App as a Mobile App 📱
 
-Your Doodles Store is now a **Progressive Web App (PWA)**! This means you can install it on your phone like a native app.
+Your Sales App is now a **Progressive Web App (PWA)**! This means you can install it on your phone like a native app.
 
 ## Benefits of Installing as PWA
 
@@ -16,9 +16,9 @@ Your Doodles Store is now a **Progressive Web App (PWA)**! This means you can in
 ### Method 1: Chrome Browser (Recommended)
 
 1. **Open Chrome** on your Android phone
-2. **Visit:** https://doodles-store.web.app
+2. **Visit:** https://sales-app.web.app
 3. **Look for the install prompt** at the bottom of the screen
-   - You'll see: "Add Doodles Store to Home screen"
+   - You'll see: "Add Sales App to Home screen"
 4. **Tap "Install"** or "Add to Home screen"
 5. **Done!** The app icon will appear on your home screen
 
@@ -26,20 +26,20 @@ Your Doodles Store is now a **Progressive Web App (PWA)**! This means you can in
 
 If you don't see the automatic prompt:
 
-1. **Open Chrome** and visit https://doodles-store.web.app
+1. **Open Chrome** and visit https://sales-app.web.app
 2. **Tap the 3-dot menu** (⋮) in the top right
 3. **Select "Add to Home screen"** or "Install app"
-4. **Name it** "Doodles Store" (or keep the default)
+4. **Name it** "Sales App" (or keep the default)
 5. **Tap "Add"**
 6. **Done!** Check your home screen
 
 ## How to Install on iPhone (iOS)
 
 1. **Open Safari** (must use Safari, not Chrome)
-2. **Visit:** https://doodles-store.web.app
+2. **Visit:** https://sales-app.web.app
 3. **Tap the Share button** (square with arrow pointing up)
 4. **Scroll down** and tap "Add to Home Screen"
-5. **Name it** "Doodles Store"
+5. **Name it** "Sales App"
 6. **Tap "Add"**
 7. **Done!** The app icon will appear on your home screen
 
@@ -71,7 +71,7 @@ Once installed, the barcode scanner will work properly because:
 ### Camera not working
 
 - Make sure you **allowed camera permissions**
-- Check Settings > Apps > Doodles Store > Permissions > Camera
+- Check Settings > Apps > Sales App > Permissions > Camera
 - Try closing and reopening the app
 
 ### App not installing
@@ -109,4 +109,4 @@ Once installed, you get:
 3. **Test the barcode scanner** in the sales section
 4. **Share the URL** with your team so they can install it too
 
-Your Doodles Store is now a fully functional mobile app! 🎉
+Your Sales App is now a fully functional mobile app! 🎉

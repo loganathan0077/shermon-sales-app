@@ -21,7 +21,7 @@ function createWindow() {
 ipcMain.on('select-directory-sync', (event) => {
     const result = dialog.showOpenDialogSync({
         properties: ['openDirectory'],
-        title: 'Select Folder for Doodles Database'
+        title: 'Select Folder for salesapp Database'
     });
     event.returnValue = result ? result[0] : null;
 });

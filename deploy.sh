@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Doodles Store - Firebase Hosting Deployment Script
+# Sales App - Firebase Hosting Deployment Script
 # This script automates the deployment process
 
-echo "🎨 Doodles Store - Deployment Script"
+echo "🎨 Sales App - Deployment Script"
 echo "===================================="
 echo ""
 
@@ -59,8 +59,8 @@ if [ $? -eq 0 ]; then
     echo "✅ Deployment successful!"
     echo ""
     echo "🌐 Your app is now live at:"
-    echo "   https://doodles-store.web.app"
-    echo "   https://doodles-store.firebaseapp.com"
+    echo "   https://sales-app.web.app"
+    echo "   https://sales-app.firebaseapp.com"
     echo ""
     echo "📝 Next steps:"
     echo "   1. Test the deployed app by visiting the URL above"

@@ -10,7 +10,7 @@ You need to add your admin email to Firestore. You can do this in two ways:
 
 #### Option A: Using Firebase Console (Recommended)
 1. Go to [Firebase Console](https://console.firebase.google.com/)
-2. Select your project: **doodles-store**
+2. Select your project: **sales-app**
 3. Go to **Firestore Database**
 4. Click **Start collection**
 5. Collection ID: `admins`
@@ -22,7 +22,7 @@ You need to add your admin email to Firestore. You can do this in two ways:
 8. Click **Save**
 
 #### Option B: Using the Browser Console
-1. Log into your app at https://doodles-store.web.app
+1. Log into your app at https://sales-app.web.app
 2. Open Browser DevTools (F12)
 3. Go to **Console** tab
 4. Run this command (replace with your email):
@@ -59,8 +59,8 @@ To add more admin emails later:
 ### Default Admin Email Pattern
 
 If you don't set up the Firestore admin list, the system will check if the logged-in user's email matches:
-- `admin@doodlesstore.com`
-- OR any email ending with `@admin.doodlesstore.com`
+- `admin@salesappstore.com`
+- OR any email ending with `@admin.salesappstore.com`
 
 You can customize this in `auth.js` if needed.
 
