@@ -7738,13 +7738,7 @@
             }
 
             billItems.forEach(item => {
-                lastSaleData.items.push({
-                    productName: item.productName,
-                    unit: item.unit,
-                    quantity: item.quantity,
-                    price: item.price,
-                    total: item.total
-                });
+                lastSaleData.items.push({ ...item });
 
                 if (!hasBillLevelData) {
                     lastSaleData.subtotal += item.total;
