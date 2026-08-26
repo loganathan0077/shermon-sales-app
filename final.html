@@ -1448,6 +1448,8 @@
                                             id="sort-barcode"></span></th>
                                     <th onclick="sortInventory('name')" style="cursor: pointer;">Product Name <span
                                             id="sort-name"></span></th>
+                                    <th class="gst-field" style="display:none;">HSN</th>
+                                    <th class="gst-field" style="display:none;">GST%</th>
                                     <th onclick="sortInventory('category')" style="cursor: pointer;">Category <span
                                             id="sort-category"></span></th>
                                     <th onclick="sortInventory('stock')" style="cursor: pointer;">Current Stock <span
@@ -1788,7 +1790,7 @@
                             return;
                         }
 
-                        let csv = 'Date,Time,Barcode,Product,Unit,Quantity,Unit Price,Total,Bill No,Customer,Payment Method\n';
+                        let csv = 'Date,Time,Barcode,Product,HSN,GST%,Unit,Quantity,Unit Price,Total,Bill No,Customer,Payment Method\n';
 
                         filteredSales.forEach(sale => {
                             const date = new Date(sale.date);
@@ -1796,7 +1798,7 @@
                             const product = `"${sale.productName.replace(/"/g, '""')}"`;
                             const customer = `"${(sale.customerName || '').replace(/"/g, '""')}"`;
 
-                            csv += `${date.toLocaleDateString()},${date.toLocaleTimeString()},${sale.barcode || 'N/A'},${product},${sale.unit || 'Piece'},${sale.quantity},${sale.price},${sale.total},${sale.receiptNumber || '-'},${customer},${sale.paymentMethod}\n`;
+                            csv += `${date.toLocaleDateString()},${date.toLocaleTimeString()},${sale.barcode || 'N/A'},${product},${sale.hsn || ''},${sale.gstRate || 0}%,${sale.unit || 'Piece'},${sale.quantity},${sale.price},${sale.total},${sale.receiptNumber || '-'},${customer},${sale.paymentMethod}\n`;
                         });
 
                         const blob = new Blob([csv], { type: 'text/csv' });
@@ -1977,6 +1979,8 @@
                                 <thead style="position: sticky; top: 0; background: white; z-index: 1;">
                                     <tr>
                                         <th>Product</th>
+                                        <th class="gst-field" style="display:none;">HSN</th>
+                                        <th class="gst-field" style="display:none;">GST%</th>
                                         <th>Units Sold</th>
                                         <th class="gst-field" style="display:none;">Taxable Value</th>
                                         <th class="gst-field" style="display:none;">CGST</th>
@@ -5487,6 +5491,7 @@
         }
 
         function updateInventoryTable() {
+            const settings = JSON.parse(localStorage.getItem('settings') || 'null') || getDefaultSettings();
             const tbody = document.getElementById('inventoryTableBody');
             if (!tbody) return; // Prevent crash if element missing
 
@@ -5533,6 +5538,8 @@
                 <tr>
                     <td>${product.barcode || 'N/A'}</td>
                     <td>${product.name}</td>
+                    ${settings.gstEnabled ? `<td>${product.hsn || ''}</td>` : ''}
+                    ${settings.gstEnabled ? `<td>${product.gstRate || 0}%</td>` : ''}
                     <td>${product.category || 'Uncategorized'}</td>
                     <td class="${stockStatus}">${product.stock}</td>
                     <td>₹${product.price.toFixed(2)}</td>
@@ -7267,7 +7274,16 @@
             const addressStr = settings.address ? `<p style="font-size:12px; margin:2px 0;">${settings.address.replace(/\n/g, '<br>')}</p>` : '';
             const mobileStr = settings.mobile ? `<p style="font-size:12px; margin:2px 0;">Ph: ${settings.mobile}</p>` : '';
             const gstinStr = settings.gstin && settings.showGST ? `<p style="font-size:12px; margin:2px 0;">GSTIN: ${settings.gstin}</p>` : '';
-            const customerStr = settings.showCustomer && lastSaleData.customerName ? `<p><strong>Customer:</strong> ${lastSaleData.customerName}</p>` : '';
+            
+            const firstItem = lastSaleData.items && lastSaleData.items.length > 0 ? lastSaleData.items[0] : null;
+            let customerStr = '';
+            if (settings.showCustomer && lastSaleData.customerName) {
+                customerStr += `<p><strong>Customer:</strong> ${lastSaleData.customerName}</p>`;
+                if (firstItem && firstItem.customerGSTIN) customerStr += `<p><strong>GSTIN:</strong> ${firstItem.customerGSTIN}</p>`;
+                if (firstItem && firstItem.customerAddress) customerStr += `<p><strong>Address:</strong> ${firstItem.customerAddress}</p>`;
+                if (firstItem && firstItem.customerState) customerStr += `<p><strong>State:</strong> ${firstItem.customerState}</p>`;
+            }
+            
             const footerStr = settings.footerMsg ? `<hr><p style="text-align: center; margin-top: 20px;">${settings.footerMsg.replace(/\n/g, '<br>')}</p>` : '<hr><p style="text-align: center; margin-top: 20px;">Thank you for your purchase!</p>';
 
             receiptContent.innerHTML = `
@@ -7770,6 +7786,9 @@
             const firstItem = billItems[0];
             const billDate = new Date(firstItem.date);
             const customerName = firstItem.customerName || 'Walk-in Customer';
+            const customerGSTIN = firstItem.customerGSTIN || '';
+            const customerAddress = firstItem.customerAddress || '';
+            const customerState = firstItem.customerState || '';
             const paymentMethod = firstItem.paymentMethod || 'N/A';
 
             // Calculate totals
@@ -7865,6 +7884,9 @@
                         <p><strong>Bill Number:</strong> ${billNumber}</p>
                         <p><strong>Date & Time:</strong> ${billDate.toLocaleString()}</p>
                         <p><strong>Customer:</strong> ${customerName}</p>
+                        ${customerGSTIN ? `<p><strong>Customer GSTIN:</strong> ${customerGSTIN}</p>` : ''}
+                        ${customerAddress ? `<p><strong>Address:</strong> ${customerAddress}</p>` : ''}
+                        ${customerState ? `<p><strong>State:</strong> ${customerState}</p>` : ''}
                         <p><strong>Payment Method:</strong> ${paymentMethod.toUpperCase()}</p>
                     </div>
                     <div>
@@ -8691,7 +8713,9 @@
                         taxableValue: 0,
                         cgst: 0,
                         sgst: 0,
-                        igst: 0
+                        igst: 0,
+                        hsn: sale.hsn || '',
+                        gstRate: sale.gstRate || 0
                     };
                 }
                 productSales[sale.productName].units += sale.quantity;
@@ -8734,6 +8758,8 @@
                     return `
                         <tr>
                             <td>${product}</td>
+                            ${gstEnabled ? `<td>${data.hsn || ''}</td>` : ''}
+                            ${gstEnabled ? `<td>${data.gstRate || 0}%</td>` : ''}
                             <td>${data.units}</td>
                             ${gstEnabled ? `<td style="text-align: right;">₹${data.taxableValue.toFixed(2)}</td>` : ''}
                             ${gstEnabled ? `<td style="text-align: right;">₹${data.cgst.toFixed(2)}</td>` : ''}
@@ -8750,6 +8776,7 @@
             const totalRow = `
                 <tr style="font-weight: bold; border-top: 2px solid #333; background: #f8f9fa;">
                     <td>Total</td>
+                    ${gstEnabled ? `<td></td><td></td>` : ''}
                     <td>${Object.values(productSales).reduce((sum, p) => sum + p.units, 0)}</td>
                     ${gstEnabled ? `<td style="text-align: right;">₹${Object.values(productSales).reduce((sum, p) => sum + p.taxableValue, 0).toFixed(2)}</td>` : ''}
                     ${gstEnabled ? `<td style="text-align: right;">₹${Object.values(productSales).reduce((sum, p) => sum + p.cgst, 0).toFixed(2)}</td>` : ''}
