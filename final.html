@@ -1300,6 +1300,19 @@
         .toggle-switch input:checked + .toggle-slider:before {
             transform: translateX(20px);
         }
+        /* Global Table Responsive Fix */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .table-responsive table {
+            width: 100%;
+            min-width: max-content;
+        }
+        .table-responsive th, .table-responsive td {
+            white-space: nowrap;
+        }
     </style>
 </head>
 
@@ -1589,7 +1602,7 @@
                         </div>
                         <div class="form-group gst-field" style="display:none;">
                             <label>Customer GSTIN / GST No</label>
-                            <input type="text" id="customerGSTIN" placeholder="Optional">
+                            <input type="text" id="customerGSTIN" placeholder="Optional" oninput="this.value = this.value.toUpperCase()">
                         </div>
                         <div class="form-group" style="grid-column: span 2;">
                             <label>Customer Address</label>
@@ -1660,23 +1673,23 @@
                                 <option value="mixed">Mixed (Cash + UPI/Balance)</option>
                             </select>
                         </div>
-                        <div class="form-group" id="customerAmountGroup" style="display: none;">
+                        <div class="form-group" id="customerAmountGroup" style="display: none; position: relative;">
                             <label>Cash Received (₹) <span style="color: red;">*</span></label>
                             <input type="number" id="customerAmount" step="0.01" onchange="calculateChange()"
                                 oninput="calculateChange()" placeholder="Enter cash amount received" required onfocus="this.select()" onkeydown="if(event.key==='Enter'){event.preventDefault(); document.getElementById('btnCompleteSale').focus();}">
-                            <small id="cashAmountError" style="color: red; display: none;"></small>
+                            <small id="cashAmountError" style="position: absolute; left: 0; bottom: -18px; font-size: 11px; color: red; display: none; white-space: nowrap;"></small>
                         </div>
                         <div class="form-group" id="otherPaymentGroup" style="display: none;">
                             <label>UPI/Balance Amount (₹)</label>
                             <input type="number" id="otherPaymentAmount" step="0.01" onchange="calculateChange()" oninput="calculateChange()"
                                 placeholder="Enter UPI/Balance amount" value="0">
                         </div>
-                        <div class="form-group" id="changeAmountGroup" style="display: none;">
+                        <div class="form-group" id="changeAmountGroup" style="display: none; position: relative;">
                             <label>Give (₹)</label>
                             <input type="number" id="changeAmount" step="0.01" readonly
-                                style="font-weight: bold; font-size: 18px; color: #dc3545;">
+                                style="font-weight: bold; color: #dc3545;">
                             <div id="negativeChangeInfo"
-                                style="margin-top: 5px; font-size: 12px; color: #dc3545; display: none;">
+                                style="position: absolute; left: 0; bottom: -18px; font-size: 11px; color: #dc3545; display: none; white-space: nowrap;">
                                 <span id="negativeChangeText"></span> | Count: <span id="negativeChangeCount">0</span>
                             </div>
                         </div>
