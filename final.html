@@ -7650,16 +7650,9 @@
 
                 salesByTransaction[sale.saleId].items.push(sale);
 
+                // REFACTOR: We ALWAYS sum up item totals to ensure accuracy.
+                salesByTransaction[sale.saleId].subtotal += sale.total; // item grossAmount
 
-
-                // Handle Subtotal and Discount
-                // REFACTOR: We ALWAYS sum up item totals to ensure accuracy. 
-                // We do NOT trust the 'subtotal' property on the sale object as it might be stale after edits.
-
-                salesByTransaction[sale.saleId].subtotal += sale.total;
-
-                // Discount is bill-level, so just take it from the item (it's repeated)
-                // Only set it if we haven't already (or update it, doesn't matter as it should be consistent)
                 if (sale.discount) {
                     salesByTransaction[sale.saleId].discount = sale.discount;
                 }
@@ -7678,7 +7671,6 @@
 
             // Generate rows - one row per BILL
             const rows = transactions.map(transaction => {
-                // Payment display
                 let paymentDisplay = transaction.paymentMethod ? transaction.paymentMethod.toUpperCase() : '-';
                 if (transaction.paymentMethod === 'mixed') {
                     if (transaction.cashAmount !== undefined && transaction.otherPaymentAmount !== undefined) {
@@ -7687,9 +7679,6 @@
                         paymentDisplay = 'Mixed';
                     }
                 }
-
-                // Recalculate total to match sum of items (just to be sure)
-                // transaction.total is already summed.
 
                 return `
                     <tr>
@@ -9806,7 +9795,7 @@
                 return;
             }
 
-            let csv = 'Date & Time,Bill No,Subtotal,Discount,Courier,Total,Customer,Payment\n';
+            let csv = 'Date & Time,Bill No,Customer Name,Customer GSTIN / GST No,Customer Address,Customer State,Tax Type (Intra-State / Inter-State),Subtotal,Discount,Taxable Amount,CGST,SGST,IGST,Total,Payment Method\n';
 
             // Group by bill
             const bills = {};
@@ -9817,34 +9806,59 @@
                         date: sale.date,
                         receiptNumber: sale.receiptNumber || '-',
                         customerName: sale.customerName || '-',
+                        customerGSTIN: sale.customerGSTIN || '-',
+                        customerAddress: sale.customerAddress || '-',
+                        customerState: sale.customerState || '-',
+                        taxType: sale.taxType || '-',
                         paymentMethod: sale.paymentMethod || '-',
                         subtotal: 0,
                         discount: 0,
-                        courier: 0,
+                        taxableValue: 0,
+                        cgst: 0,
+                        sgst: 0,
+                        igst: 0,
                         total: 0,
                         cashAmount: sale.cashAmount,
-                        otherPaymentAmount: sale.otherPaymentAmount,
-                        hasBillLevelData: false
+                        otherPaymentAmount: sale.otherPaymentAmount
                     };
                 }
 
-                // Handle Subtotal and Discount logic (same as Today Sales)
-                // REFACTOR: Always sum up item totals to ensure accuracy.
-                // We do NOT trust the 'subtotal' property on the sale object as it might be stale.
                 bills[sale.saleId].subtotal += sale.total;
+                bills[sale.saleId].taxableValue += (sale.taxableValue || 0);
+                bills[sale.saleId].cgst += (sale.cgst || 0);
+                bills[sale.saleId].sgst += (sale.sgst || 0);
+                bills[sale.saleId].igst += (sale.igst || 0);
 
-                // Discount is bill-level, so just take it from any item
                 if (sale.discount) {
                     bills[sale.saleId].discount = sale.discount;
                 }
-                if (sale.courier) {
-                    bills[sale.saleId].courier = sale.courier;
-                }
+                
+                // Inherit customer data from any item if not set (fallback)
+                if (bills[sale.saleId].customerGSTIN === '-' && sale.customerGSTIN) bills[sale.saleId].customerGSTIN = sale.customerGSTIN;
+                if (bills[sale.saleId].customerAddress === '-' && sale.customerAddress) bills[sale.saleId].customerAddress = sale.customerAddress;
+                if (bills[sale.saleId].customerState === '-' && sale.customerState) bills[sale.saleId].customerState = sale.customerState;
+                if (bills[sale.saleId].taxType === '-' && sale.taxType) bills[sale.saleId].taxType = sale.taxType;
             });
+
+            let grandSubtotal = 0;
+            let grandDiscount = 0;
+            let grandTaxable = 0;
+            let grandCGST = 0;
+            let grandSGST = 0;
+            let grandIGST = 0;
+            let grandTotalInvoice = 0;
 
             // Calculate final totals and generate CSV rows
             Object.values(bills).forEach(bill => {
-                bill.total = bill.subtotal - bill.discount + (bill.courier || 0);
+                bill.total = bill.taxableValue + bill.cgst + bill.sgst + bill.igst;
+                
+                grandSubtotal += bill.subtotal;
+                grandDiscount += bill.discount;
+                grandTaxable += bill.taxableValue;
+                grandCGST += bill.cgst;
+                grandSGST += bill.sgst;
+                grandIGST += bill.igst;
+                grandTotalInvoice += bill.total;
 
                 const date = new Date(bill.date);
                 const dateStr = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
@@ -9857,13 +9871,20 @@
                         paymentDisplay = 'Mixed';
                     }
                 }
+                
+                let taxTypeDisplay = bill.taxType === 'intra' ? 'Intra-State (CGST + SGST)' : (bill.taxType === 'inter' ? 'Inter-State (IGST)' : '-');
 
                 // Escape commas in fields
-                const customer = `"${bill.customerName.replace(/"/g, '""')}"`;
+                const customerName = `"${bill.customerName.replace(/"/g, '""')}"`;
+                const customerGSTIN = `"${bill.customerGSTIN.toUpperCase().replace(/"/g, '""')}"`;
+                const customerAddress = `"${bill.customerAddress.replace(/"/g, '""')}"`;
                 const payment = `"${paymentDisplay.replace(/"/g, '""')}"`;
 
-                csv += `${dateStr},${bill.receiptNumber},${bill.subtotal.toFixed(2)},${bill.discount.toFixed(2)},${(bill.courier || 0).toFixed(2)},${bill.total.toFixed(2)},${customer},${payment}\n`;
+                csv += `${dateStr},${bill.receiptNumber},${customerName},${customerGSTIN},${customerAddress},${bill.customerState},${taxTypeDisplay},${bill.subtotal.toFixed(2)},${bill.discount.toFixed(2)},${bill.taxableValue.toFixed(2)},${bill.cgst.toFixed(2)},${bill.sgst.toFixed(2)},${bill.igst.toFixed(2)},${bill.total.toFixed(2)},${payment}\n`;
             });
+            
+            // Append Grand Total Row
+            csv += `GRAND TOTAL,,,,,,,${grandSubtotal.toFixed(2)},${grandDiscount.toFixed(2)},${grandTaxable.toFixed(2)},${grandCGST.toFixed(2)},${grandSGST.toFixed(2)},${grandIGST.toFixed(2)},${grandTotalInvoice.toFixed(2)},\n`;
 
             const blob = new Blob([csv], { type: 'text/csv' });
             const url = window.URL.createObjectURL(blob);
