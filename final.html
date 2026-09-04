@@ -7839,25 +7839,39 @@
         }
 
         function downloadGSTInvoicePDF() {
-            const element = document.getElementById('gstInvoicePrintArea');
+            const originalElement = document.getElementById('gstInvoicePrintArea');
             const receiptNo = lastSaleData ? lastSaleData.receiptNumber : 'invoice';
             
-            // Temporary styling adjust for PDF export
-            element.style.padding = '10px';
-            element.style.maxWidth = '100%';
+            // Clone the element to avoid scrolling/UI issues affecting the capture
+            const element = originalElement.cloneNode(true);
+            
+            // Ensure absolute sizing for A4 (794px width is standard A4 at 96 DPI)
+            element.style.padding = '20px';
+            element.style.margin = '0';
+            element.style.width = '794px';
+            element.style.maxWidth = 'none';
+            element.style.position = 'absolute';
+            element.style.top = '0';
+            element.style.left = '-9999px'; // Hide it off-screen
+            element.style.background = 'white'; // Ensure background is white, not transparent
+            
+            document.body.appendChild(element);
 
             const opt = {
                 margin:       10,
                 filename:     `Invoice_${receiptNo}.pdf`,
                 image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2 },
+                html2canvas:  { scale: 2, useCORS: true, scrollY: 0, scale: 2 },
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
             html2pdf().set(opt).from(element).save().then(() => {
-                // Restore padding
-                element.style.padding = '40px';
-                element.style.maxWidth = '794px';
+                document.body.removeChild(element);
+            }).catch(err => {
+                console.error("PDF generation error:", err);
+                if (document.body.contains(element)) {
+                    document.body.removeChild(element);
+                }
             });
         }
 
