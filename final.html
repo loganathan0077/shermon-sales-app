@@ -285,21 +285,24 @@
             border-bottom: 2px solid #dee2e6;
             overflow: hidden;
             width: 100%;
+            box-sizing: border-box;
         }
 
         .nav-tab {
             flex: 1;
+            min-width: 0;
             padding: 15px 5px;
             background: none;
             border: none;
             cursor: pointer;
-            font-size: clamp(11px, 1.1vw, 15px);
+            font-size: clamp(10px, 1vw, 14px);
             color: #495057;
             transition: all 0.3s;
             white-space: nowrap;
             text-align: center;
             overflow: hidden;
             text-overflow: ellipsis;
+            box-sizing: border-box;
         }
 
         .nav-tab:hover {
@@ -1369,10 +1372,10 @@
             <button class="nav-tab" data-tab="sales" onclick="switchTab('sales', this)">💰 Record Sale</button>
             <button class="nav-tab" data-tab="reports" onclick="switchTab('reports', this)">📊 Reports</button>
             <button class="nav-tab" data-tab="products" onclick="switchTab('products', this)">🏷️ Products</button>
-            <button class="nav-tab" data-tab="calculator" onclick="switchTab('calculator', this)">🧮 Calculator</button>
+            <button class="nav-tab" data-tab="pettycash" onclick="switchTab('pettycash', this)">📒 Petty Cash</button>
             <button class="nav-tab" data-tab="denomination" onclick="switchTab('denomination', this)">💵 Cash Denomination</button>
+            <button class="nav-tab" data-tab="calculator" onclick="switchTab('calculator', this)">🧮 Calculator</button>
             <button class="nav-tab" data-tab="settings" onclick="switchTab('settings', this)">⚙️ Settings</button>
-            <button class="nav-tab" data-tab="pettycash" onclick="switchTab('pettycash', this)">📒 Petty Cash & Expenses</button>
         </div>
 
         <div class="content">
