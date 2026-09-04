@@ -11911,7 +11911,7 @@
                 row.innerHTML = `
                     <div style="width: 60px; font-weight: 600; text-align: right;">₹${val}</div>
                     <div>×</div>
-                    <input type="number" class="form-control dc-input" id="denom_qty_${val}" style="flex: 1;" value="0" min="0" oninput="this.value = this.value.replace(/[^0-9]/g, ''); calculateDayClosing();">
+                    <input type="number" class="form-control dc-input" id="denom_qty_${val}" style="flex: 1; height: 45px; font-size: 1.1em; font-weight: 600; padding: 5px 15px; border-radius: 8px; border: 2px solid #e2e8f0; text-align: center; color: #2d3748; box-sizing: border-box; transition: border-color 0.2s;" value="0" min="0" oninput="this.value = this.value.replace(/[^0-9]/g, ''); calculateDayClosing();" onfocus="this.style.borderColor='#a0aec0'" onblur="this.style.borderColor='#e2e8f0'">
                     <div>=</div>
                     <div style="width: 80px; text-align: right; font-weight: 600;" id="denom_amt_${val}">₹0.00</div>
                 `;
