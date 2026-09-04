@@ -283,20 +283,23 @@
             display: flex;
             background: #f8f9fa;
             border-bottom: 2px solid #dee2e6;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
+            overflow: hidden;
+            width: 100%;
         }
 
         .nav-tab {
-            padding: 15px 30px;
+            flex: 1;
+            padding: 15px 5px;
             background: none;
             border: none;
             cursor: pointer;
-            font-size: 16px;
+            font-size: clamp(11px, 1.1vw, 15px);
             color: #495057;
             transition: all 0.3s;
             white-space: nowrap;
-            flex-shrink: 0;
+            text-align: center;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .nav-tab:hover {
@@ -822,23 +825,15 @@
             .nav-tabs {
                 overflow-x: auto;
                 -webkit-overflow-scrolling: touch;
+                justify-content: flex-start;
+                padding-bottom: 5px;
                 gap: 5px;
             }
 
-            .nav-tabs {
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
-                justify-content: flex-start;
-                /* Align start to allow scrolling */
-                padding-bottom: 5px;
-                /* Space for scrollbar */
-            }
-
             .nav-tab {
-                padding: 10px 15px;
+                padding: 12px 15px;
                 font-size: 13px;
                 flex: 0 0 auto;
-                /* Don't shrink */
                 white-space: nowrap;
             }
 
