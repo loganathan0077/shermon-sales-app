@@ -23,6 +23,7 @@
     <!-- Include Html5-QRCode library for barcode scanning -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
     <!-- SheetJS for Excel Export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -1719,7 +1720,28 @@
                             <button class="btn btn-danger" onclick="saveReceiptPDF()">💾 Save as PDF</button>
                             <button class="btn btn-success" onclick="sendReceiptToWhatsApp()"
                                 style="background: #25D366; border-color: #25D366;">📱 Send to WhatsApp</button>
+                            <button class="btn btn-info" onclick="openGSTInvoice()">📄 Invoice</button>
                             <button class="btn btn-warning" onclick="closeReceipt()">✖️ Close</button>
+                        </div>
+                    </div>
+                
+                <!-- GST Invoice Modal -->
+                <div id="gstInvoiceModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; overflow-y: auto; padding: 20px;">
+                    <div style="max-width: 900px; margin: 0 auto; background: white; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); display: flex; flex-direction: column;">
+                        <!-- Action Bar -->
+                        <div style="padding: 15px 20px; background: #f8f9fa; border-bottom: 1px solid #dee2e6; display: flex; justify-content: space-between; align-items: center; border-radius: 8px 8px 0 0;">
+                            <h3 style="margin: 0;">GST Tax Invoice</h3>
+                            <div style="display: flex; gap: 10px;">
+                                <button class="btn btn-primary" onclick="printGSTInvoice()">🖨️ Print Invoice</button>
+                                <button class="btn btn-danger" onclick="downloadGSTInvoicePDF()">⬇️ Download PDF</button>
+                                <button class="btn btn-success" onclick="sendInvoiceToWhatsApp()" style="background: #25D366; border-color: #25D366;">📱 Send to WhatsApp</button>
+                                <button class="btn btn-warning" onclick="closeGSTInvoice()">✖️ Close</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Printable A4 Area -->
+                        <div id="gstInvoicePrintArea" style="padding: 40px; background: white; min-height: 1122px; width: 100%; max-width: 794px; margin: 0 auto; box-sizing: border-box; font-family: Arial, sans-serif; color: #333;">
+                            <!-- Content injected via JS -->
                         </div>
                     </div>
                 </div>
@@ -7563,6 +7585,322 @@
 
             // Open WhatsApp Web/App with pre-filled message
             const whatsappUrl = `https://web.whatsapp.com/send?text=${encodedMessage}`;
+            window.open(whatsappUrl, '_blank');
+        }
+
+        
+        function closeGSTInvoice() {
+            document.getElementById('gstInvoiceModal').style.display = 'none';
+        }
+
+        function numberToWords(num) {
+            if (num === 0) return 'Zero';
+            const a = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+            const b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+            const format = (n) => {
+                if (n < 20) return a[n];
+                if (n < 100) return b[Math.floor(n / 10)] + (n % 10 !== 0 ? ' ' + a[n % 10] : '');
+                if (n < 1000) return a[Math.floor(n / 100)] + ' Hundred' + (n % 100 !== 0 ? ' and ' + format(n % 100) : '');
+                if (n < 100000) return format(Math.floor(n / 1000)) + ' Thousand' + (n % 1000 !== 0 ? ' ' + format(n % 1000) : '');
+                if (n < 10000000) return format(Math.floor(n / 100000)) + ' Lakh' + (n % 100000 !== 0 ? ' ' + format(n % 100000) : '');
+                return format(Math.floor(n / 10000000)) + ' Crore' + (n % 10000000 !== 0 ? ' ' + format(n % 10000000) : '');
+            };
+            const wholeNum = Math.floor(num);
+            const decimalNum = Math.round((num - wholeNum) * 100);
+            let result = 'Rupees ' + format(wholeNum);
+            if (decimalNum > 0) {
+                result += ' and ' + format(decimalNum) + ' Paise';
+            }
+            return result + ' Only';
+        }
+
+        function openGSTInvoice() {
+            if (!lastSaleData || !lastSaleData.items || lastSaleData.items.length === 0) {
+                showAlert('No sale data found to generate invoice.', '⚠️');
+                return;
+            }
+
+            const settings = JSON.parse(localStorage.getItem('settings') || 'null') || getDefaultSettings();
+            const bName = settings.businessName || 'Business Name';
+            const bAddress = settings.address ? settings.address.replace(/\n/g, '<br>') : 'Business Address';
+            const bMobile = settings.mobile || '';
+            const bEmail = settings.email || '';
+            const bGstin = settings.gstin || '';
+            
+            // Build Seller Header
+            let contactInfo = [];
+            if (bMobile) contactInfo.push(`Ph: ${bMobile}`);
+            if (bEmail) contactInfo.push(`Email: ${bEmail}`);
+            let contactHtml = contactInfo.length > 0 ? `<div style="font-size: 12px; margin-top: 5px;">${contactInfo.join(' | ')}</div>` : '';
+
+            // Customer Details
+            const cName = lastSaleData.customerName || 'Cash Customer';
+            const cGstin = lastSaleData.customerGSTIN && lastSaleData.customerGSTIN !== '-' ? lastSaleData.customerGSTIN.toUpperCase() : 'Not Provided';
+            const cAddress = lastSaleData.customerAddress && lastSaleData.customerAddress !== '-' ? lastSaleData.customerAddress.replace(/\n/g, '<br>') : '-';
+            const cState = lastSaleData.customerState && lastSaleData.customerState !== '-' ? lastSaleData.customerState : '-';
+            const taxTypeStr = lastSaleData.taxType === 'intra' ? 'Intra-State (CGST + SGST)' : (lastSaleData.taxType === 'inter' ? 'Inter-State (IGST)' : '-');
+
+            let paymentStr = lastSaleData.paymentMethod ? lastSaleData.paymentMethod.toUpperCase() : '-';
+            if (lastSaleData.paymentMethod === 'mixed') paymentStr = `CASH + UPI`;
+
+            const dateStr = new Date(lastSaleData.date).toLocaleDateString();
+
+            // Build Item Rows & Aggregates from saved data
+            let rowsHtml = '';
+            let grandGross = 0, grandDisc = 0, grandTaxable = 0, grandCGST = 0, grandSGST = 0, grandIGST = 0, grandTotal = 0;
+            
+            lastSaleData.items.forEach((item, index) => {
+                const qty = item.quantity || 0;
+                const rate = item.price || 0;
+                const amount = item.grossAmount || (rate * qty);
+                const discPerc = item.discountPercent ? `${item.discountPercent}%` : '0%';
+                const discVal = item.itemDiscount || 0;
+                const taxable = item.taxableValue || 0;
+                const cgst = item.cgst || 0;
+                const sgst = item.sgst || 0;
+                const igst = item.igst || 0;
+                const total = item.total || 0;
+
+                grandGross += amount;
+                grandDisc += discVal;
+                grandTaxable += taxable;
+                grandCGST += cgst;
+                grandSGST += sgst;
+                grandIGST += igst;
+                grandTotal += total;
+
+                rowsHtml += `
+                    <tr>
+                        <td style="padding: 6px; border: 1px solid #ddd; text-align: center; font-size: 11px;">${index + 1}</td>
+                        <td style="padding: 6px; border: 1px solid #ddd; font-size: 11px;">${item.productName}</td>
+                        <td style="padding: 6px; border: 1px solid #ddd; text-align: center; font-size: 11px;">${item.hsn || '-'}</td>
+                        <td style="padding: 6px; border: 1px solid #ddd; text-align: center; font-size: 11px;">${item.gstRate || 0}%</td>
+                        <td style="padding: 6px; border: 1px solid #ddd; text-align: center; font-size: 11px;">${qty}</td>
+                        <td style="padding: 6px; border: 1px solid #ddd; text-align: right; font-size: 11px;">₹${rate.toFixed(2)}</td>
+                        <td style="padding: 6px; border: 1px solid #ddd; text-align: right; font-size: 11px;">${discPerc}</td>
+                        <td style="padding: 6px; border: 1px solid #ddd; text-align: right; font-size: 11px;">₹${amount.toFixed(2)}</td>
+                        <td style="padding: 6px; border: 1px solid #ddd; text-align: right; font-size: 11px;">₹${taxable.toFixed(2)}</td>
+                        <td style="padding: 6px; border: 1px solid #ddd; text-align: right; font-size: 11px;">₹${cgst.toFixed(2)}</td>
+                        <td style="padding: 6px; border: 1px solid #ddd; text-align: right; font-size: 11px;">₹${sgst.toFixed(2)}</td>
+                        <td style="padding: 6px; border: 1px solid #ddd; text-align: right; font-size: 11px;">₹${igst.toFixed(2)}</td>
+                        <td style="padding: 6px; border: 1px solid #ddd; text-align: right; font-size: 11px; font-weight: bold;">₹${total.toFixed(2)}</td>
+                    </tr>
+                `;
+            });
+
+            // Adjust totals with bill-level discount and courier if needed
+            // Wait, bill level discount should just modify the grandDisc and Taxable.
+            // But user said: "The GST Invoice MUST use the exact saved values from lastSaleData."
+            // We just render exactly what's there.
+            
+            // Build the Invoice HTML
+            const invoiceHtml = `
+                <div style="border: 1px solid #333; padding: 2px;">
+                    <div style="border: 1px solid #333; padding: 20px;">
+                        <!-- Header -->
+                        <div style="text-align: center; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 10px; position: relative;">
+                            <div style="position: absolute; top: 0; right: 0; font-size: 10px; font-weight: bold; border: 1px solid #333; padding: 2px 5px;">ORIGINAL FOR RECIPIENT</div>
+                            <h2 style="margin: 0; font-size: 20px; font-weight: bold;">TAX INVOICE</h2>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 15px;">
+                            <!-- Seller -->
+                            <div style="flex: 1;">
+                                ${settings.logoData ? `<img src="${settings.logoData}" style="max-height: 50px; margin-bottom: 5px;">` : ''}
+                                <h3 style="margin: 0 0 5px 0; font-size: 16px;">${bName}</h3>
+                                <div style="font-size: 12px; line-height: 1.4;">
+                                    ${bAddress}<br>
+                                    ${contactHtml}
+                                    ${bGstin ? `<strong>GSTIN:</strong> ${bGstin.toUpperCase()}` : ''}
+                                </div>
+                            </div>
+                            
+                            <!-- Invoice Details -->
+                            <div style="flex: 1; text-align: right; font-size: 12px; line-height: 1.6;">
+                                <div><strong>Invoice No:</strong> ${lastSaleData.receiptNumber}</div>
+                                <div><strong>Invoice Date:</strong> ${dateStr}</div>
+                                <div><strong>Payment Method:</strong> ${paymentStr}</div>
+                                <div><strong>Tax Type:</strong> ${taxTypeStr}</div>
+                            </div>
+                        </div>
+
+                        <!-- Buyer -->
+                        <div style="border: 1px solid #333; padding: 10px; margin-bottom: 20px; font-size: 12px; line-height: 1.4;">
+                            <div style="font-weight: bold; margin-bottom: 5px; border-bottom: 1px solid #ccc; display: inline-block;">Bill To:</div>
+                            <div style="display: flex;">
+                                <div style="flex: 1;">
+                                    <div><strong>Name:</strong> ${cName}</div>
+                                    <div><strong>GSTIN:</strong> ${cGstin}</div>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div><strong>Address:</strong> ${cAddress}</div>
+                                    <div><strong>State:</strong> ${cState}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Item Table -->
+                        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                            <thead>
+                                <tr style="background: #f8f9fa;">
+                                    <th style="padding: 6px; border: 1px solid #333; font-size: 11px;">S.No</th>
+                                    <th style="padding: 6px; border: 1px solid #333; font-size: 11px;">Product Name</th>
+                                    <th style="padding: 6px; border: 1px solid #333; font-size: 11px;">HSN</th>
+                                    <th style="padding: 6px; border: 1px solid #333; font-size: 11px;">GST%</th>
+                                    <th style="padding: 6px; border: 1px solid #333; font-size: 11px;">Qty</th>
+                                    <th style="padding: 6px; border: 1px solid #333; font-size: 11px;">Rate</th>
+                                    <th style="padding: 6px; border: 1px solid #333; font-size: 11px;">Disc %</th>
+                                    <th style="padding: 6px; border: 1px solid #333; font-size: 11px;">Amount</th>
+                                    <th style="padding: 6px; border: 1px solid #333; font-size: 11px;">Subtotal</th>
+                                    <th style="padding: 6px; border: 1px solid #333; font-size: 11px;">CGST</th>
+                                    <th style="padding: 6px; border: 1px solid #333; font-size: 11px;">SGST</th>
+                                    <th style="padding: 6px; border: 1px solid #333; font-size: 11px;">IGST</th>
+                                    <th style="padding: 6px; border: 1px solid #333; font-size: 11px;">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${rowsHtml}
+                            </tbody>
+                        </table>
+
+                        <!-- Footer Summaries -->
+                        <div style="display: flex; gap: 20px; font-size: 12px; align-items: stretch;">
+                            <!-- Tax Summary Box -->
+                            <div style="flex: 1; border: 1px solid #333; padding: 10px;">
+                                <div style="font-weight: bold; margin-bottom: 5px; border-bottom: 1px solid #333; padding-bottom: 3px;">TAX SUMMARY</div>
+                                <table style="width: 100%; font-size: 11px;">
+                                    <tr><td>Gross Amount:</td><td style="text-align: right;">₹${grandGross.toFixed(2)}</td></tr>
+                                    <tr><td>Total Item Discount:</td><td style="text-align: right;">₹${grandDisc.toFixed(2)}</td></tr>
+                                    <tr><td>Taxable Value:</td><td style="text-align: right;">₹${grandTaxable.toFixed(2)}</td></tr>
+                                    <tr><td>CGST:</td><td style="text-align: right;">₹${grandCGST.toFixed(2)}</td></tr>
+                                    <tr><td>SGST:</td><td style="text-align: right;">₹${grandSGST.toFixed(2)}</td></tr>
+                                    <tr><td>IGST:</td><td style="text-align: right;">₹${grandIGST.toFixed(2)}</td></tr>
+                                    <tr><td colspan="2"><hr style="border: 0; border-top: 1px solid #ccc; margin: 5px 0;"></td></tr>
+                                    <tr><td><strong>Subtotal / Taxable Total:</strong></td><td style="text-align: right;"><strong>₹${grandTaxable.toFixed(2)}</strong></td></tr>
+                                    <tr><td><strong>Invoice Total:</strong></td><td style="text-align: right;"><strong>₹${grandTotal.toFixed(2)}</strong></td></tr>
+                                </table>
+                            </div>
+
+                            <!-- Invoice Total & Signatory -->
+                            <div style="flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+                                <div style="border: 1px solid #333; padding: 10px;">
+                                    <table style="width: 100%; font-size: 12px; line-height: 1.6;">
+                                        <tr><td>Total Taxable Value:</td><td style="text-align: right;">₹${grandTaxable.toFixed(2)}</td></tr>
+                                        <tr><td>Total CGST:</td><td style="text-align: right;">₹${grandCGST.toFixed(2)}</td></tr>
+                                        <tr><td>Total SGST:</td><td style="text-align: right;">₹${grandSGST.toFixed(2)}</td></tr>
+                                        <tr><td>Total IGST:</td><td style="text-align: right;">₹${grandIGST.toFixed(2)}</td></tr>
+                                        <tr><td colspan="2"><hr style="border: 0; border-top: 1px solid #333; margin: 5px 0;"></td></tr>
+                                        <tr style="font-size: 14px; font-weight: bold;">
+                                            <td>Grand Total:</td><td style="text-align: right;">₹${grandTotal.toFixed(2)}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div style="margin-top: 10px; font-weight: bold; font-style: italic;">
+                                    Amount in Words:<br>
+                                    <span style="font-weight: normal;">${numberToWords(grandTotal)}</span>
+                                </div>
+                                <div style="margin-top: 30px; text-align: right; border-top: 1px solid #ccc; padding-top: 5px;">
+                                    <strong>For ${bName}</strong><br><br><br>
+                                    Authorised Signatory
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('gstInvoicePrintArea').innerHTML = invoiceHtml;
+            document.getElementById('gstInvoiceModal').style.display = 'block';
+        }
+
+        function printGSTInvoice() {
+            const printContent = document.getElementById('gstInvoicePrintArea').innerHTML;
+            const printWindow = window.open('', '', 'height=800,width=1000');
+            printWindow.document.write(`
+            <html>
+                <head>
+                    <title>Print Invoice</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: white; color: black; }
+                        @media print {
+                            @page { size: A4; margin: 10mm; }
+                            body { margin: 0; padding: 0; }
+                        }
+                    </style>
+                </head>
+                <body>${printContent}</body>
+            </html>
+            `);
+            printWindow.document.close();
+            printWindow.focus();
+            setTimeout(() => {
+                printWindow.print();
+            }, 500);
+        }
+
+        function downloadGSTInvoicePDF() {
+            const element = document.getElementById('gstInvoicePrintArea');
+            const receiptNo = lastSaleData ? lastSaleData.receiptNumber : 'invoice';
+            
+            // Temporary styling adjust for PDF export
+            element.style.padding = '10px';
+            element.style.maxWidth = '100%';
+
+            const opt = {
+                margin:       10,
+                filename:     `Invoice_${receiptNo}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2 },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                // Restore padding
+                element.style.padding = '40px';
+                element.style.maxWidth = '794px';
+            });
+        }
+
+        function sendInvoiceToWhatsApp() {
+            if (!lastSaleData) return;
+            
+            const settings = JSON.parse(localStorage.getItem('settings') || 'null') || getDefaultSettings();
+            const bName = settings.businessName || 'Business Name';
+            const cName = lastSaleData.customerName || 'Customer';
+            const cGstin = lastSaleData.customerGSTIN && lastSaleData.customerGSTIN !== '-' ? lastSaleData.customerGSTIN.toUpperCase() : 'Not Provided';
+            
+            let grandGross = 0, grandTaxable = 0, grandTotalTax = 0, grandTotal = 0;
+            let itemsList = '';
+            
+            lastSaleData.items.forEach(item => {
+                const qty = item.quantity || 0;
+                const rate = item.price || 0;
+                grandGross += item.grossAmount || (rate * qty);
+                grandTaxable += item.taxableValue || 0;
+                grandTotalTax += (item.cgst || 0) + (item.sgst || 0) + (item.igst || 0);
+                grandTotal += item.total || 0;
+                
+                itemsList += `▪ ${item.productName} (Qty: ${qty}) - ₹${item.total.toFixed(2)}\n`;
+            });
+            
+            let message = `📄 *GST TAX INVOICE*\n`;
+            message += `${bName}\n`;
+            message += `------------------------------\n`;
+            message += `*Invoice No:* ${lastSaleData.receiptNumber}\n`;
+            message += `*Date:* ${new Date(lastSaleData.date).toLocaleDateString()}\n`;
+            message += `------------------------------\n`;
+            message += `*Bill To:* ${cName}\n`;
+            if (cGstin !== 'Not Provided') message += `*GSTIN:* ${cGstin}\n`;
+            message += `------------------------------\n`;
+            message += `*Items:*\n${itemsList}`;
+            message += `------------------------------\n`;
+            message += `*Taxable Value:* ₹${grandTaxable.toFixed(2)}\n`;
+            message += `*GST Total:* ₹${grandTotalTax.toFixed(2)}\n`;
+            message += `*Grand Total:* ₹${grandTotal.toFixed(2)}\n`;
+            message += `------------------------------\n`;
+            message += `Thank you for your business! 🙏`;
+            
+            const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
             window.open(whatsappUrl, '_blank');
         }
 
