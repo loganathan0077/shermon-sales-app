@@ -1314,6 +1314,29 @@
         .table-responsive th, .table-responsive td {
             white-space: nowrap;
         }
+    
+        /* Petty Cash Styles */
+        .pc-summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .pc-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-left: 4px solid #667eea; }
+        .pc-card.cash-card { border-left-color: #28a745; }
+        .pc-card.bank-card { border-left-color: #17a2b8; }
+        .pc-card.total-card { border-left-color: #764ba2; background: #f8f9fa; }
+        .pc-card h4 { margin: 0 0 10px 0; color: #6c757d; font-size: 14px; text-transform: uppercase; }
+        .pc-card .amount { font-size: 24px; font-weight: bold; margin: 0; color: #333; }
+        .pc-card .amount.negative { color: #dc3545; }
+        
+        .pc-form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .pc-transaction-type { display: flex; gap: 10px; margin-bottom: 20px; }
+        .pc-type-btn { flex: 1; padding: 10px; border: 1px solid #ccc; background: white; border-radius: 5px; cursor: pointer; font-weight: bold; text-align: center; }
+        .pc-type-btn.expense.active { background: #dc3545; color: white; border-color: #dc3545; }
+        .pc-type-btn.income.active { background: #28a745; color: white; border-color: #28a745; }
+        .pc-type-btn.transfer.active { background: #17a2b8; color: white; border-color: #17a2b8; }
+        
+        .pc-badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; color: white; display: inline-block; }
+        .pc-badge.expense { background: #dc3545; }
+        .pc-badge.income { background: #28a745; }
+        .pc-badge.transfer { background: #17a2b8; }
+
     </style>
 </head>
 
@@ -1354,6 +1377,7 @@
             <button class="nav-tab" data-tab="calculator" onclick="switchTab('calculator', this)">🧮 Calculator</button>
             <button class="nav-tab" data-tab="denomination" onclick="switchTab('denomination', this)">💵 Cash Denomination</button>
             <button class="nav-tab" data-tab="settings" onclick="switchTab('settings', this)">⚙️ Settings</button>
+            <button class="nav-tab" data-tab="pettycash" onclick="switchTab('pettycash', this)">📒 Petty Cash & Expenses</button>
         </div>
 
         <div class="content">
@@ -2354,6 +2378,227 @@
                     </div>
                 </div>
             </div>
+
+
+            <!-- Petty Cash Tab -->
+            <div id="pettycash" class="tab-content">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2 class="section-title" style="margin: 0;">Petty Cash & Expenses</h2>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-warning" onclick="openPCOpeningBalanceModal()">⚖️ Opening Balances</button>
+                        <button class="btn btn-info" onclick="openPCCategoryManager()">⚙️ Categories</button>
+                    </div>
+                </div>
+
+                <!-- Summary Cards -->
+                <div class="pc-summary-grid">
+                    <div class="pc-card cash-card">
+                        <h4>Opening Cash</h4>
+                        <p class="amount" id="pcOpeningCash">₹0.00</p>
+                    </div>
+                    <div class="pc-card cash-card">
+                        <h4>Cash In</h4>
+                        <p class="amount" id="pcCashIn" style="color: #28a745;">₹0.00</p>
+                    </div>
+                    <div class="pc-card cash-card">
+                        <h4>Cash Out</h4>
+                        <p class="amount" id="pcCashOut" style="color: #dc3545;">₹0.00</p>
+                    </div>
+                    <div class="pc-card cash-card" style="background: #e8f5e9; border-width: 0 0 0 6px;">
+                        <h4 style="color: #1b5e20;">Current Cash In Hand</h4>
+                        <p class="amount" id="pcCurrentCash">₹0.00</p>
+                    </div>
+                </div>
+
+                <div class="pc-summary-grid">
+                    <div class="pc-card bank-card">
+                        <h4>Opening Bank</h4>
+                        <p class="amount" id="pcOpeningBank">₹0.00</p>
+                    </div>
+                    <div class="pc-card bank-card">
+                        <h4>Bank In</h4>
+                        <p class="amount" id="pcBankIn" style="color: #28a745;">₹0.00</p>
+                    </div>
+                    <div class="pc-card bank-card">
+                        <h4>Bank Out</h4>
+                        <p class="amount" id="pcBankOut" style="color: #dc3545;">₹0.00</p>
+                    </div>
+                    <div class="pc-card bank-card" style="background: #e0f7fa; border-width: 0 0 0 6px;">
+                        <h4 style="color: #006064;">Current Bank Balance</h4>
+                        <p class="amount" id="pcCurrentBank">₹0.00</p>
+                    </div>
+                </div>
+
+                <div class="pc-summary-grid" style="grid-template-columns: 1fr;">
+                    <div class="pc-card total-card" style="text-align: center;">
+                        <h4>TOTAL AVAILABLE BALANCE (CASH + BANK)</h4>
+                        <p class="amount" id="pcTotalBalance" style="font-size: 32px; color: #764ba2;">₹0.00</p>
+                    </div>
+                </div>
+
+                <!-- Add Transaction Form -->
+                <div style="background: white; padding: 25px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 30px; border: 1px solid #dee2e6;">
+                    <h3 style="margin-top: 0; margin-bottom: 20px;" id="pcFormTitle">➕ Add New Transaction</h3>
+                    
+                    <input type="hidden" id="pcEditId" value="">
+
+                    <div class="pc-transaction-type">
+                        <div class="pc-type-btn expense active" id="pcTypeExpense" onclick="setPCTransactionType('expense')">Expense (DR)</div>
+                        <div class="pc-type-btn income" id="pcTypeIncome" onclick="setPCTransactionType('income')">Income (CR)</div>
+                        <div class="pc-type-btn transfer" id="pcTypeTransfer" onclick="setPCTransactionType('transfer')">Transfer</div>
+                    </div>
+
+                    <div class="pc-form-grid">
+                        <div class="form-group">
+                            <label>Date *</label>
+                            <input type="date" id="pcDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Amount (₹) *</label>
+                            <input type="number" id="pcAmount" step="0.01" min="0.01" placeholder="Enter amount" required>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Fields Container -->
+                    <div class="pc-form-grid" id="pcDynamicFields">
+                        <!-- Populated by JS -->
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 20px;">
+                        <label>Description</label>
+                        <input type="text" id="pcDescription" placeholder="Enter transaction details">
+                    </div>
+                    
+                    <div class="form-group" style="margin-bottom: 20px;">
+                        <label>Remarks / Ref No</label>
+                        <input type="text" id="pcRemarks" placeholder="Optional">
+                    </div>
+
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-success" onclick="savePCTransaction()" id="pcSaveBtn">✅ Save Transaction</button>
+                        <button class="btn btn-warning" onclick="resetPCForm()" id="pcCancelBtn" style="display: none;">✖️ Cancel Edit</button>
+                    </div>
+                </div>
+
+                <!-- Ledger & Reports -->
+                <div style="background: white; padding: 25px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border: 1px solid #dee2e6;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;">
+                        <h3 style="margin: 0;">Ledger & Reports</h3>
+                        
+                        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                            <input type="date" id="pcFilterFrom">
+                            <span>to</span>
+                            <input type="date" id="pcFilterTo">
+                            <input type="text" id="pcSearchInput" placeholder="Search voucher, category, desc..." style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                            <button class="btn btn-primary" onclick="renderPCLedger()">🔍 Search</button>
+                            <button class="btn btn-info" onclick="printPCReport()">🖨️ Print Report</button>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table style="width: 100%; min-width: 900px;">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Voucher</th>
+                                    <th>Type</th>
+                                    <th>Details</th>
+                                    <th>Category</th>
+                                    <th>Account / Mode</th>
+                                    <th style="text-align: right;">DR (₹)</th>
+                                    <th style="text-align: right;">CR (₹)</th>
+                                    <th style="text-align: center;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pcLedgerBody">
+                                <!-- JS Injected -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Summaries -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 30px;">
+                        <!-- Expense Summary -->
+                        <div style="border: 1px solid #dee2e6; border-radius: 8px; padding: 15px;">
+                            <h4 style="margin-top: 0; color: #dc3545; border-bottom: 1px solid #eee; padding-bottom: 10px;">Expense Summary</h4>
+                            <table style="width: 100%;">
+                                <tbody id="pcExpenseSummaryBody"></tbody>
+                            </table>
+                        </div>
+                        <!-- Income Summary -->
+                        <div style="border: 1px solid #dee2e6; border-radius: 8px; padding: 15px;">
+                            <h4 style="margin-top: 0; color: #28a745; border-bottom: 1px solid #eee; padding-bottom: 10px;">Income Summary</h4>
+                            <table style="width: 100%;">
+                                <tbody id="pcIncomeSummaryBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Opening Balance Modal -->
+            <div id="pcOpeningModal" class="modal">
+                <div class="modal-content" style="max-width: 400px;">
+                    <span class="close" onclick="document.getElementById('pcOpeningModal').style.display='none'">&times;</span>
+                    <h2>Set Opening Balances</h2>
+                    <p style="color: #666; font-size: 12px; margin-bottom: 20px;">Set your starting cash and bank balances manually. This is the foundation of all calculations.</p>
+                    
+                    <div class="form-group">
+                        <label>Opening Cash (₹)</label>
+                        <input type="number" id="pcModalOpeningCash" step="0.01" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Opening Bank (₹)</label>
+                        <input type="number" id="pcModalOpeningBank" step="0.01" value="0">
+                    </div>
+                    
+                    <button class="btn btn-success" onclick="savePCOpeningBalances()" style="width: 100%; margin-top: 10px;">💾 Save Balances</button>
+                </div>
+            </div>
+
+            <!-- Manage Categories Modal -->
+            <div id="pcCategoryModal" class="modal">
+                <div class="modal-content" style="max-width: 600px;">
+                    <span class="close" onclick="document.getElementById('pcCategoryModal').style.display='none'">&times;</span>
+                    <h2>Manage Categories</h2>
+                    
+                    <div style="display: flex; gap: 10px; margin-bottom: 20px; align-items: flex-end;">
+                        <div class="form-group" style="flex: 2; margin-bottom: 0;">
+                            <label>New Category Name</label>
+                            <input type="text" id="pcNewCatName" placeholder="e.g. Office Snacks">
+                        </div>
+                        <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                            <label>Type</label>
+                            <select id="pcNewCatType">
+                                <option value="expense">Expense</option>
+                                <option value="income">Income</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary" onclick="addPCCategory()" style="margin-bottom: 0;">➕ Add</button>
+                    </div>
+                    
+                    <div style="max-height: 400px; overflow-y: auto;">
+                        <table style="width: 100%;">
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pcCategoryListBody"></tbody>
+                        </table>
+                    </div>
+                    <div style="margin-top: 15px; text-align: right;">
+                        <button class="btn btn-warning" onclick="restoreDefaultPCCategories()">🔄 Restore Defaults</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Hidden Print Container -->
+            <div id="pcPrintContainer" style="display: none;"></div>
+
 
             <!-- Settings Tab -->
             <div id="settings" class="tab-content" style="display: none;">
