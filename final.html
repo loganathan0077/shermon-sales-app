@@ -2263,7 +2263,7 @@
 
             <!-- Cash Denomination Tab -->
             <div id="denomination" class="tab-content" style="display: none;">
-                <h2 class="section-title">💵 Cash Denomination & Day Closing</h2>
+                <h2 class="section-title">💵 Closing Summary</h2>
                 <div style="display: flex; gap: 20px; flex-wrap: wrap;">
                     
                     <!-- Left: Denomination Inputs -->
@@ -2285,46 +2285,34 @@
                             <h3 style="margin: 0;">Closing Summary</h3>
                             <button class="btn btn-sm btn-secondary" onclick="resetDayClosingForm()">Clear Form</button>
                         </div>
-                        <div class="dc-grid">
-                            <div>
-                                <label>Opening Cash (₹)</label>
-                                <input type="number" id="dcOpeningCash" class="form-control dc-input" value="0" step="0.01" oninput="calculateDayClosing()">
+                        <div class="dc-grid" style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 15px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <label style="margin: 0; font-weight: 500; width: 200px;">Opening Cash (₹)</label>
+                                <input type="number" id="dcOpeningCash" class="form-control dc-input" value="0" step="0.01" oninput="calculateDayClosing()" style="width: 180px; text-align: right;">
                             </div>
-                            <div>
-                                <label>Cash Sales (₹)</label>
-                                <input type="number" id="dcCashSales" class="form-control dc-input" value="0" step="0.01" oninput="calculateDayClosing()">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <label style="margin: 0; font-weight: 500; width: 200px;">Cash Sales (₹)</label>
+                                <input type="number" id="dcCashSales" class="form-control dc-input" value="0" step="0.01" oninput="calculateDayClosing()" style="width: 180px; text-align: right;">
                             </div>
-                            <div>
-                                <label>Bank / UPI Sales (₹)</label>
-                                <input type="number" id="dcBankSales" class="form-control dc-input" value="0" step="0.01" oninput="calculateDayClosing()">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <label style="margin: 0; font-weight: 500; width: 200px;">Bank / UPI Sales (₹)</label>
+                                <input type="number" id="dcBankSales" class="form-control dc-input" value="0" step="0.01" oninput="calculateDayClosing()" style="width: 180px; text-align: right;">
                             </div>
-                            <div>
-                                <label>Cash Expenses (₹)</label>
-                                <input type="number" id="dcCashExpenses" class="form-control dc-input" value="0" step="0.01" oninput="calculateDayClosing()">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <label style="margin: 0; font-weight: 500; width: 200px;">Online Sales (₹)</label>
+                                <input type="number" id="dcOnlineSales" class="form-control dc-input" value="0" step="0.01" oninput="calculateDayClosing()" style="width: 180px; text-align: right;">
                             </div>
-                            <div>
-                                <label>Bank Expenses (₹)</label>
-                                <input type="number" id="dcBankExpenses" class="form-control dc-input" value="0" step="0.01" oninput="calculateDayClosing()">
-                            </div>
-                        </div>
-                        <hr>
-                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                                <span>Expected Closing Cash:</span>
-                                <strong id="dcExpectedCash">₹0.00</strong>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                                <span>Actual Cash Counted:</span>
-                                <strong id="dcActualCash">₹0.00</strong>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; font-size: 1.2em; margin-top: 10px; padding-top: 10px; border-top: 1px solid #dee2e6;">
-                                <span>Difference:</span>
-                                <strong id="dcDifference">₹0.00</strong>
+                            
+                            <hr style="margin: 5px 0;">
+                            
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <label style="margin: 0; font-weight: bold; width: 200px;">Total Sales (₹)</label>
+                                <input type="number" id="dcTotalSales" class="form-control dc-input" value="0" step="0.01" disabled style="width: 180px; text-align: right; font-weight: bold; background: #e9ecef; cursor: not-allowed; border: 1px solid #ced4da;">
                             </div>
                         </div>
-                        <div class="form-group">
-                            <label>Notes</label>
-                            <input type="text" id="dcNotes" class="form-control dc-input" placeholder="Any discrepancies or notes...">
+                        <div class="form-group" style="margin-bottom: 20px;">
+                            <label style="font-weight: 500;">Notes</label>
+                            <textarea id="dcNotes" class="form-control dc-input" placeholder="Enter closing notes..." rows="3" style="resize: vertical;"></textarea>
                         </div>
                         <button id="dcSaveBtn" class="btn btn-success dc-input" style="width: 100%; font-size: 1.1em; padding: 10px;" onclick="saveDayClosing()">💾 Save Day Closing</button>
                         <input type="hidden" id="editingDayClosingId" value="">
@@ -2361,12 +2349,8 @@
                                     <th>Opening</th>
                                     <th>Cash Sales</th>
                                     <th>Bank/UPI Sales</th>
-                                    <th>Cash Expenses</th>
-                                    <th>Bank Expenses</th>
-                                    <th>Expected</th>
-                                    <th>Actual</th>
-                                    <th>Difference</th>
-                                    <th>Status</th>
+                                    <th>Online Sales</th>
+                                    <th>Total Sales</th>
                                     <th>Notes</th>
                                     <th>Actions</th>
                                 </tr>
@@ -11956,29 +11940,13 @@
             document.getElementById('denomTotalCounted').textContent = '₹' + totalCounted.toFixed(2);
             
             // Calculate Summary
-            const opening = parseFloat(document.getElementById('dcOpeningCash').value) || 0;
             const cashSales = parseFloat(document.getElementById('dcCashSales').value) || 0;
             const bankSales = parseFloat(document.getElementById('dcBankSales').value) || 0;
-            const cashExp = parseFloat(document.getElementById('dcCashExpenses').value) || 0;
-            const bankExp = parseFloat(document.getElementById('dcBankExpenses').value) || 0;
+            const onlineSales = parseFloat(document.getElementById('dcOnlineSales').value) || 0;
             
-            const expected = opening + cashSales - cashExp;
-            const diff = totalCounted - expected;
-            
-            document.getElementById('dcExpectedCash').textContent = '₹' + expected.toFixed(2);
-            document.getElementById('dcActualCash').textContent = '₹' + totalCounted.toFixed(2);
-            
-            const diffDisplay = document.getElementById('dcDifference');
-            if (Math.abs(diff) < 0.01) {
-                diffDisplay.textContent = 'Matched: ₹0.00';
-                diffDisplay.style.color = '#28a745';
-            } else if (diff > 0) {
-                diffDisplay.textContent = 'Excess: ₹' + diff.toFixed(2);
-                diffDisplay.style.color = '#17a2b8';
-            } else {
-                diffDisplay.textContent = 'Shortage: ₹' + Math.abs(diff).toFixed(2);
-                diffDisplay.style.color = '#dc3545';
-            }
+            const totalSales = cashSales + bankSales + onlineSales;
+            const totalSalesInput = document.getElementById('dcTotalSales');
+            if (totalSalesInput) totalSalesInput.value = totalSales.toFixed(2);
         }
 
         function saveDayClosing() {
@@ -11999,11 +11967,15 @@
             record.openingCash = parseFloat(document.getElementById('dcOpeningCash').value) || 0;
             record.cashSales = parseFloat(document.getElementById('dcCashSales').value) || 0;
             record.bankSales = parseFloat(document.getElementById('dcBankSales').value) || 0;
-            record.cashExpenses = parseFloat(document.getElementById('dcCashExpenses').value) || 0;
-            record.bankExpenses = parseFloat(document.getElementById('dcBankExpenses').value) || 0;
-            record.expectedCash = record.openingCash + record.cashSales - record.cashExpenses;
+            record.onlineSales = parseFloat(document.getElementById('dcOnlineSales').value) || 0;
+            record.totalSales = record.cashSales + record.bankSales + record.onlineSales;
+            
+            record.cashExpenses = 0;
+            record.bankExpenses = 0;
+            record.expectedCash = 0;
             record.actualCash = totalCounted;
-            record.difference = record.actualCash - record.expectedCash;
+            record.difference = 0;
+            
             record.notes = document.getElementById('dcNotes').value || '';
             
             // Check if editing or new
@@ -12030,8 +12002,8 @@
             document.getElementById('dcOpeningCash').value = 0;
             document.getElementById('dcCashSales').value = 0;
             document.getElementById('dcBankSales').value = 0;
-            document.getElementById('dcCashExpenses').value = 0;
-            document.getElementById('dcBankExpenses').value = 0;
+            document.getElementById('dcOnlineSales').value = 0;
+            document.getElementById('dcTotalSales').value = 0;
             document.getElementById('dcNotes').value = '';
             
             document.getElementById('editingDayClosingId').value = '';
@@ -12184,15 +12156,11 @@
                         <div style="font-weight: 500;">${dateStr}</div>
                         <div style="font-size: 0.85em; color: #666;">${timeStr}</div>
                     </td>
-                    <td>₹${record.openingCash.toFixed(2)}</td>
-                    <td>₹${record.cashSales.toFixed(2)}</td>
+                    <td>₹${(record.openingCash || 0).toFixed(2)}</td>
+                    <td>₹${(record.cashSales || 0).toFixed(2)}</td>
                     <td>₹${(record.bankSales || 0).toFixed(2)}</td>
-                    <td>₹${record.cashExpenses.toFixed(2)}</td>
-                    <td>₹${(record.bankExpenses || 0).toFixed(2)}</td>
-                    <td>₹${record.expectedCash.toFixed(2)}</td>
-                    <td style="font-weight: bold;">₹${record.actualCash.toFixed(2)}</td>
-                    <td>${diffHtml}</td>
-                    <td>${statusHtml}</td>
+                    <td>₹${(record.onlineSales || 0).toFixed(2)}</td>
+                    <td style="font-weight: bold;">₹${(record.totalSales || 0).toFixed(2)}</td>
                     <td>${record.notes || ''}</td>
                     <td>
                         <button class="btn btn-sm btn-info" onclick="editDayClosing('${record.id}')">✏️ Edit</button>
@@ -12218,11 +12186,11 @@
             });
             
             // Populate summary
-            document.getElementById('dcOpeningCash').value = record.openingCash;
-            document.getElementById('dcCashSales').value = record.cashSales;
-            document.getElementById('dcBankSales').value = record.bankSales;
-            document.getElementById('dcCashExpenses').value = record.cashExpenses;
-            document.getElementById('dcBankExpenses').value = record.bankExpenses || 0;
+            document.getElementById('dcOpeningCash').value = record.openingCash || 0;
+            document.getElementById('dcCashSales').value = record.cashSales || 0;
+            document.getElementById('dcBankSales').value = record.bankSales || 0;
+            document.getElementById('dcOnlineSales').value = record.onlineSales || 0;
+            document.getElementById('dcTotalSales').value = record.totalSales || 0;
             document.getElementById('dcNotes').value = record.notes || '';
             
             // Setup hidden edit fields
