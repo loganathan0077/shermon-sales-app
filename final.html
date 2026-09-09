@@ -1438,16 +1438,17 @@
         </div>
 
         <div class="nav-tabs">
-            <button class="nav-tab active" data-tab="dashboard" onclick="switchTab('dashboard', this)">📈 Dashboard</button>
-            <button class="nav-tab" data-tab="inventory" onclick="switchTab('inventory', this)">📦 Inventory</button>
-            <button class="nav-tab" data-tab="sales" onclick="switchTab('sales', this)">💰 Record Sale</button>
-            <button class="nav-tab" data-tab="reports" onclick="switchTab('reports', this)">📊 Reports</button>
-            <button class="nav-tab" data-tab="products" onclick="switchTab('products', this)">🏷️ Products</button>
-            <button class="nav-tab" data-tab="pettycash" onclick="switchTab('pettycash', this)">📒 Petty Cash</button>
-            <button class="nav-tab" data-tab="denomination" onclick="switchTab('denomination', this)">💵 Cash Denomination</button>
-            <button class="nav-tab" data-tab="calculator" onclick="switchTab('calculator', this)">🧮 Calculator</button>
-            <button class="nav-tab" data-tab="settings" onclick="switchTab('settings', this)">⚙️ Settings</button>
+            <button class="nav-tab active" data-tab="dashboard" onclick="switchTab('dashboard', this)">📈 Dashboard <kbd style="background: #e9ecef; border: 1px solid #ced4da; color: #495057; padding: 2px 4px; border-radius: 3px; font-size: 11px; margin-left: 5px; font-family: monospace;">F1</kbd></button>
+            <button class="nav-tab" data-tab="inventory" onclick="switchTab('inventory', this)">📦 Inventory <kbd style="background: #e9ecef; border: 1px solid #ced4da; color: #495057; padding: 2px 4px; border-radius: 3px; font-size: 11px; margin-left: 5px; font-family: monospace;">F2</kbd></button>
+            <button class="nav-tab" data-tab="sales" onclick="switchTab('sales', this)">💰 Record Sale <kbd style="background: #e9ecef; border: 1px solid #ced4da; color: #495057; padding: 2px 4px; border-radius: 3px; font-size: 11px; margin-left: 5px; font-family: monospace;">F3</kbd></button>
+            <button class="nav-tab" data-tab="reports" onclick="switchTab('reports', this)">📊 Reports <kbd style="background: #e9ecef; border: 1px solid #ced4da; color: #495057; padding: 2px 4px; border-radius: 3px; font-size: 11px; margin-left: 5px; font-family: monospace;">F4</kbd></button>
+            <button class="nav-tab" data-tab="products" onclick="switchTab('products', this)">🏷️ Products <kbd style="background: #e9ecef; border: 1px solid #ced4da; color: #495057; padding: 2px 4px; border-radius: 3px; font-size: 11px; margin-left: 5px; font-family: monospace;">F5</kbd></button>
+            <button class="nav-tab" data-tab="pettycash" onclick="switchTab('pettycash', this)">📒 Petty Cash <kbd style="background: #e9ecef; border: 1px solid #ced4da; color: #495057; padding: 2px 4px; border-radius: 3px; font-size: 11px; margin-left: 5px; font-family: monospace;">F6</kbd></button>
+            <button class="nav-tab" data-tab="denomination" onclick="switchTab('denomination', this)">💵 Day Closing <kbd style="background: #e9ecef; border: 1px solid #ced4da; color: #495057; padding: 2px 4px; border-radius: 3px; font-size: 11px; margin-left: 5px; font-family: monospace;">F7</kbd></button>
+            <button class="nav-tab" data-tab="calculator" onclick="switchTab('calculator', this)">🧮 Calculator <kbd style="background: #e9ecef; border: 1px solid #ced4da; color: #495057; padding: 2px 4px; border-radius: 3px; font-size: 11px; margin-left: 5px; font-family: monospace;">F8</kbd></button>
+            <button class="nav-tab" data-tab="settings" onclick="switchTab('settings', this)">⚙️ Settings <kbd style="background: #e9ecef; border: 1px solid #ced4da; color: #495057; padding: 2px 4px; border-radius: 3px; font-size: 11px; margin-left: 5px; font-family: monospace;">F9</kbd></button>
         </div>
+
 
         <div class="content">
             <!-- Dashboard Tab -->
@@ -1721,7 +1722,7 @@
                         <div class="form-group">
                             <label>Courier Charges (₹)</label>
                             <input type="number" id="courierCharges" min="0" step="0.01" value="0"
-                                onchange="updateDiscount()" placeholder="Courier charges" onfocus="this.select()" onkeydown="if(event.key==='Enter'){event.preventDefault(); document.getElementById('customerName').focus();}">
+                                onchange="updateDiscount()" placeholder="Courier charges" onfocus="this.select()" onkeydown="if(event.key==='Enter'){event.preventDefault(); document.getElementById('paymentMethodSearch').focus();}">
                         </div>
                         <div class="form-group gst-field" style="display:none;">
                             <label>Taxable Amount (₹)</label>
@@ -1744,8 +1745,7 @@
                             <input type="number" id="cartTotal" step="0.01" readonly
                                 style="font-weight: bold; font-size: 20px; color: #28a745;">
                         </div>
-                        <div class="form-group gst-field" style="display:none;">
-                            <label>Tax Type</label>
+                        <div style="display:none;">
                             <select id="saleTaxType" class="form-control" onchange="updateCartDisplay()">
                                 <option value="auto">Auto (Detect from State)</option>
                                 <option value="intra">Intra-State (CGST + SGST)</option>
@@ -1789,7 +1789,7 @@
                         </div>
                     </div>
                     <div style="display: flex; gap: 10px; margin-top: 20px;">
-                        <button type="button" id="btnCompleteSale" class="btn btn-success" onclick="completeSale()">✅ Complete Sale</button>
+                        <button type="button" id="btnCompleteSale" class="btn btn-success" onclick="completeSale()" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.click();}">✅ Complete Sale</button>
                         <button type="button" class="btn btn-warning" onclick="holdSale()">⏸️ Hold Sale</button>
                         <button type="button" class="btn btn-cart-remove" onclick="clearCart()">🗑️ Clear Cart</button>
                     </div>
@@ -1872,6 +1872,155 @@
             <!-- Reports Tab -->
             <div id="reports" class="tab-content">
                 <h2 class="section-title">Sales Reports & Analytics</h2>
+
+                <!-- NEW UNIFIED FILTER & REPORTS DASHBOARD -->
+                <div class="report-section" style="margin-bottom: 40px; background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #dee2e6; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                    
+                    <!-- Filters -->
+                    <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 20px;">
+                        
+                        <!-- Date Filter -->
+                        <div style="flex: 1; min-width: 300px;">
+                            <label style="font-weight: bold; color: #495057;">📅 Date Range</label>
+                            <div style="display: flex; gap: 10px; margin-top: 5px; flex-wrap: wrap;">
+                                <select id="globalReportDateFilter" class="form-control" style="width: 100%; max-width: 400px; padding: 10px; font-size: 16px; height: auto;" onchange="handleGlobalDateFilterChange()">
+                                    <option value="today">Today</option>
+                                    <option value="yesterday">Yesterday</option>
+                                    <option value="this_week">This Week</option>
+                                    <option value="this_month">This Month</option>
+                                    <option value="last_month">Last Month</option>
+                                    <option value="custom">Custom Date</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Custom Date Range -->
+                            <div id="globalReportCustomDateContainer" style="display: none; gap: 10px; margin-top: 10px; align-items: center;">
+                                <input type="date" id="globalReportStartDate" class="form-control">
+                                <span>to</span>
+                                <input type="date" id="globalReportEndDate" class="form-control">
+                                <button class="btn btn-primary btn-sm" onclick="generateOnScreenReports()">Apply Filter</button>
+                            </div>
+                        </div>
+
+                        <!-- Customer Filter -->
+                        <div style="flex: 1; min-width: 300px;">
+                            <label style="font-weight: bold; color: #495057;">👥 Customer Filter (Optional)</label>
+                            <div style="position: relative; margin-top: 5px;">
+                                <input type="text" id="globalReportCustomerSearch" class="form-control" style="width: 100%; max-width: 400px; padding: 10px; font-size: 16px; height: auto;" placeholder="Search customer name, phone, or GSTIN..." oninput="searchGlobalReportCustomer(this.value)">
+                                <div id="globalReportCustomerResults" class="custom-dropdown" style="display: none; position: absolute; width: 100%; top: 100%; left: 0; z-index: 1000; max-height: 200px; overflow-y: auto;"></div>
+                            </div>
+                            <div id="globalReportSelectedCustomerContainer" style="display: none; margin-top: 10px; padding: 10px; background: #e9ecef; border-radius: 5px; align-items: center; justify-content: space-between;">
+                                <div><strong id="globalReportSelectedCustomerName"></strong></div>
+                                <button class="btn btn-sm btn-outline-danger" onclick="clearGlobalReportCustomer()">❌ Clear</button>
+                            </div>
+                            <input type="hidden" id="globalReportCustomerId" value="">
+                        </div>
+                    </div>
+
+                    <!-- Customer Stats (Only visible if customer selected) -->
+                    <div id="globalReportCustomerStats" style="display: none; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; padding: 15px; background: #e3f2fd; border-radius: 8px; border: 1px solid #b8daff;">
+                        <div><strong>Bills:</strong> <span id="customerStatBills">0</span></div>
+                        <div><strong>Total Purchases:</strong> <span id="customerStatTotal">₹0</span></div>
+                        <div><strong>Total Discount:</strong> <span id="customerStatDiscount">₹0</span></div>
+                        <div><strong>Last Purchase Date:</strong> <span id="customerStatLastPurchase">-</span></div>
+                    </div>
+
+                    <!-- Report Type Tabs -->
+                    <div style="border-bottom: 2px solid #dee2e6; margin-bottom: 20px; display: flex; gap: 10px;">
+                        <button id="tabBtnBillWise" class="btn tab-btn" style="border-bottom-left-radius: 0; border-bottom-right-radius: 0; margin-bottom: -2px; border-bottom: 2px solid #007bff; background: transparent; color: #007bff; font-weight: bold; border-top: none; border-left: none; border-right: none;" onclick="switchReportSubTab('billWise')">📄 Bill-wise Sales</button>
+                        <button id="tabBtnItemWise" class="btn tab-btn" style="border-bottom-left-radius: 0; border-bottom-right-radius: 0; margin-bottom: -2px; border-bottom: 2px solid transparent; background: transparent; color: #495057; font-weight: bold; border-top: none; border-left: none; border-right: none;" onclick="switchReportSubTab('itemWise')">📦 Item-wise Sales</button>
+                        <button id="tabBtnSalesSummary" class="btn tab-btn" style="border-bottom-left-radius: 0; border-bottom-right-radius: 0; margin-bottom: -2px; border-bottom: 2px solid transparent; background: transparent; color: #495057; font-weight: bold; border-top: none; border-left: none; border-right: none;" onclick="switchReportSubTab('salesSummary')">📊 Sales Summary</button>
+                    </div>
+
+                    <!-- Export Buttons for the current filtered data -->
+                    <div style="margin-bottom: 15px; display: flex; gap: 10px;">
+                        <button class="btn btn-primary btn-sm" onclick="exportFilteredReport('bills')">📥 Export Bills (CSV)</button>
+                        <button class="btn btn-info btn-sm" onclick="exportFilteredReport('items')">📥 Export Items (CSV)</button>
+                    </div>
+
+                    <!-- Tab Contents -->
+                    <div id="subTabBillWise" class="report-sub-tab">
+                        <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                            <table class="table">
+                                <thead style="position: sticky; top: 0; background: white; z-index: 10;">
+                                    <tr>
+                                        <th>Date & Time</th>
+                                        <th>Bill No</th>
+                                        <th>Customer</th>
+                                        <th class="gst-field">GSTIN</th>
+                                        <th>Subtotal</th>
+                                        <th>Discount</th>
+                                        <th class="gst-field">Taxable</th>
+                                        <th class="gst-field">CGST</th>
+                                        <th class="gst-field">SGST</th>
+                                        <th class="gst-field">IGST</th>
+                                        <th>Total</th>
+                                        <th>Payment</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="billWiseReportBody"></tbody>
+                            </table>
+                        </div>
+                        <div id="billWiseTotals" style="display: flex; flex-wrap: wrap; gap: 15px; margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px; font-weight: bold; border: 1px solid #dee2e6;"></div>
+                    </div>
+
+                    <div id="subTabItemWise" class="report-sub-tab" style="display: none;">
+                        <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                            <table class="table">
+                                <thead style="position: sticky; top: 0; background: white; z-index: 10;">
+                                    <tr>
+                                        <th style="cursor: pointer; color: #007bff;" onclick="sortItemWiseReport('date')">Date ↕️</th>
+                                        <th style="cursor: pointer; color: #007bff;" onclick="sortItemWiseReport('product')">Product ↕️</th>
+                                        <th>Barcode</th>
+                                        <th class="gst-field">HSN</th>
+                                        <th class="gst-field">GST%</th>
+                                        <th>Unit</th>
+                                        <th style="cursor: pointer; color: #007bff;" onclick="sortItemWiseReport('qty')">Qty ↕️</th>
+                                        <th>Unit Price</th>
+                                        <th style="cursor: pointer; color: #007bff;" onclick="sortItemWiseReport('total')">Total Sales ↕️</th>
+                                        <th>Bill No</th>
+                                        <th>Customer</th>
+                                        <th>Payment</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="itemWiseReportBody"></tbody>
+                            </table>
+                        </div>
+                        <div id="itemWiseTotals" style="display: flex; flex-wrap: wrap; gap: 15px; margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px; font-weight: bold; border: 1px solid #dee2e6;"></div>
+                    </div>
+
+                    <div id="subTabSalesSummary" class="report-sub-tab" style="display: none;">
+                        <div style="margin-bottom: 15px;">
+                            <label style="font-weight: bold;">Group By Period:</label>
+                            <select id="summaryPeriodSelector" class="form-control" style="width: 200px; display: inline-block; margin-left: 10px;" onchange="generateOnScreenReports()">
+                                <option value="daily">Daily</option>
+                                <option value="weekly">Weekly</option>
+                                <option value="monthly">Monthly</option>
+                            </select>
+                        </div>
+                        <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                            <table class="table">
+                                <thead style="position: sticky; top: 0; background: white; z-index: 10;">
+                                    <tr>
+                                        <th>Period</th>
+                                        <th>No. of Bills</th>
+                                        <th>Items Sold</th>
+                                        <th>Subtotal</th>
+                                        <th>Discount</th>
+                                        <th class="gst-field">Taxable</th>
+                                        <th class="gst-field">CGST</th>
+                                        <th class="gst-field">SGST</th>
+                                        <th class="gst-field">IGST</th>
+                                        <th>Total Sales</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="salesSummaryReportBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
 
                 <!-- View Bill Details Section -->
                 <div class="report-section" style="margin-bottom: 30px;">
@@ -3443,9 +3592,12 @@
                 <button class="modal-close" onclick="closeSupplierManagementModal()">&times;</button>
             </div>
             
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <input type="text" id="supplierSearchInput" placeholder="🔍 Search supplier..." oninput="renderSupplierTable()" class="form-control" style="width: 300px;">
-                <button class="btn btn-success" onclick="openAddSupplierModal()">➕ Add Supplier</button>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 15px; flex-wrap: wrap;">
+                <input type="text" id="supplierSearchInput" placeholder="🔍 Search supplier..." oninput="renderSupplierTable()" class="form-control" style="flex: 1; min-width: 250px; max-width: 400px; padding: 10px; font-size: 16px;">
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-info" style="padding: 10px 15px; font-size: 16px;" onclick="exportSuppliersCSV()">📥 Export Suppliers (CSV)</button>
+                    <button class="btn btn-success" style="padding: 10px 15px; font-size: 16px;" onclick="openAddSupplierModal()">➕ Add Supplier</button>
+                </div>
             </div>
             
             <div class="table-responsive">
@@ -3521,9 +3673,12 @@
                 <button class="modal-close" onclick="closeCustomerManagementModal()">&times;</button>
             </div>
             
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <input type="text" id="customerSearchInput" placeholder="🔍 Search customer..." oninput="renderCustomerTable()" class="form-control" style="width: 300px;">
-                <button class="btn btn-success" onclick="openAddCustomerModal()">➕ Add Customer</button>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 15px; flex-wrap: wrap;">
+                <input type="text" id="customerSearchInput" placeholder="🔍 Search customer..." oninput="renderCustomerTable()" class="form-control" style="flex: 1; min-width: 250px; max-width: 400px; padding: 10px; font-size: 16px;">
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-info" style="padding: 10px 15px; font-size: 16px;" onclick="exportCustomersCSV()">📥 Export Customers (CSV)</button>
+                    <button class="btn btn-success" style="padding: 10px 15px; font-size: 16px;" onclick="openAddCustomerModal()">➕ Add Customer</button>
+                </div>
             </div>
             
             <div class="table-responsive">
@@ -5068,6 +5223,30 @@
             document.getElementById('supplierManagementModal').style.display = 'none';
         }
 
+        function exportSuppliersCSV() {
+            if (!suppliers || suppliers.length === 0) {
+                showAlert('No suppliers available to export.', '⚠️');
+                return;
+            }
+            
+            let csv = 'Supplier ID,Name,Phone,Email,GSTIN,State,Country,Address,Notes\n';
+            suppliers.forEach(s => {
+                const name = `"${(s.name || '').replace(/"/g, '""')}"`;
+                const address = `"${(s.address || '').replace(/"/g, '""')}"`;
+                const notes = `"${(s.notes || '').replace(/"/g, '""')}"`;
+                
+                csv += `${s.id},${name},${s.phone || ''},${s.email || ''},${s.gstin || ''},${s.state || ''},${s.country || ''},${address},${notes}\n`;
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `suppliers_export.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
         function renderSupplierTable() {
             const query = document.getElementById('supplierSearchInput').value.toLowerCase();
             const tbody = document.getElementById('supplierTableBody');
@@ -5076,7 +5255,8 @@
                 if (!s || !s.name) return false;
                 return s.name.toLowerCase().includes(query) || 
                        (s.gstin && s.gstin.toLowerCase().includes(query)) ||
-                       (s.phone && s.phone.includes(query));
+                       (s.phone && s.phone.includes(query)) ||
+                       (s.state && s.state.toLowerCase().includes(query));
             });
 
             if (filtered.length === 0) {
@@ -5237,6 +5417,37 @@
             document.getElementById('customerManagementModal').style.display = 'none';
         }
 
+        function exportCustomersCSV() {
+            if (!customers || customers.length === 0) {
+                showAlert('No customers available to export.', '⚠️');
+                return;
+            }
+            
+            let csv = 'Customer ID,Name,Phone,Email,GSTIN,State,Country,Address,Notes\n';
+            customers.forEach(c => {
+                const name = `"${(c.name || '').replace(/"/g, '""')}"`;
+                const address = `"${(c.address || '').replace(/"/g, '""')}"`;
+                const notes = `"${(c.notes || '').replace(/"/g, '""')}"`;
+                
+                csv += `${c.id},${name},${c.phone || ''},${c.email || ''},${c.gstin || ''},${c.state || ''},${c.country || ''},${address},${notes}\n`;
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `customers_export.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        function viewCustomer(id) {
+            const c = customers.find(cus => cus.id === id);
+            if (!c) return;
+            const details = `Name: ${c.name}\nGSTIN: ${c.gstin || '-'}\nPhone: ${c.phone || '-'}\nAddress: ${c.address || '-'}\nState: ${c.state || '-'}\nCountry: ${c.country || '-'}\nNotes: ${c.notes || '-'}`;
+            showAlert(details, 'ℹ️ Customer Details');
+        }
+
         function renderCustomerTable() {
             const query = document.getElementById('customerSearchInput').value.toLowerCase();
             const tbody = document.getElementById('customerTableBody');
@@ -5245,7 +5456,8 @@
                 if (!c || !c.name) return false;
                 return c.name.toLowerCase().includes(query) || 
                        (c.gstin && c.gstin.toLowerCase().includes(query)) ||
-                       (c.phone && c.phone.includes(query));
+                       (c.phone && c.phone.includes(query)) ||
+                       (c.state && c.state.toLowerCase().includes(query));
             });
 
             if (filtered.length === 0) {
@@ -5260,8 +5472,9 @@
                     <td>${c.state || '-'}</td>
                     <td>${c.phone || '-'}</td>
                     <td>
-                        <button class="btn btn-warning btn-sm" onclick="openAddCustomerModal(null, '${c.id}')">✏️</button>
-                        <button class="btn btn-danger btn-sm" onclick="deleteCustomer('${c.id}')">🗑️</button>
+                        <button class="btn btn-info btn-sm" onclick="viewCustomer('${c.id}')" title="View Details">👁️</button>
+                        <button class="btn btn-warning btn-sm" onclick="openAddCustomerModal(null, '${c.id}')" title="Edit">✏️</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteCustomer('${c.id}')" title="Delete">🗑️</button>
                     </td>
                 </tr>
             `).join('');
@@ -7611,19 +7824,30 @@
                         paymentComboboxSelectedIndex = (paymentComboboxSelectedIndex - 1 + items.length) % items.length;
                         updateComboboxSelection(items, paymentComboboxSelectedIndex);
                     }
-                } else if (e.key === 'Enter' || e.key === ' ') {
+                } else if (e.key === 'Enter') {
                     e.preventDefault();
                     if (dropdown.style.display !== 'block') {
+                        const cashInput = document.getElementById('customerAmount');
+                        if (cashInput && document.getElementById('customerAmountGroup').style.display !== 'none') {
+                            cashInput.focus();
+                            cashInput.select();
+                        } else {
+                            document.getElementById('btnCompleteSale').focus();
+                        }
+                    } else if (paymentComboboxSelectedIndex >= 0 && items.length > paymentComboboxSelectedIndex) {
+                        items[paymentComboboxSelectedIndex].click();
+                    } else if (items.length > 0) {
+                        items[0].click(); // Auto select first if Enter pressed
+                    }
+                } else if (e.key === ' ') {
+                    if (dropdown.style.display !== 'block') {
+                        e.preventDefault();
                         filterPaymentMethods();
                         items = dropdown.querySelectorAll('.custom-dropdown-item');
-                        if (items.length > 0 && e.key === 'Enter') {
+                        if (items.length > 0) {
                            paymentComboboxSelectedIndex = 0;
                            updateComboboxSelection(items, paymentComboboxSelectedIndex);
                         }
-                    } else if (paymentComboboxSelectedIndex >= 0) {
-                        items[paymentComboboxSelectedIndex].click();
-                    } else if (items.length > 0 && e.key === 'Enter') {
-                        items[0].click(); // Auto select first if Enter pressed
                     }
                 } else if (e.key === 'Escape') {
                     dropdown.style.display = 'none';
@@ -13362,6 +13586,27 @@
 
         // Global POS Keyboard Shortcuts
         document.addEventListener('keydown', function(e) {
+            // Function keys (F1-F9) navigation
+            if (!e.altKey && !e.ctrlKey && !e.shiftKey && e.key && e.key.startsWith('F')) {
+                const tabMap = {
+                    'F1': 'dashboard',
+                    'F2': 'inventory',
+                    'F3': 'sales',
+                    'F4': 'reports',
+                    'F5': 'products',
+                    'F6': 'pettycash',
+                    'F7': 'denomination',
+                    'F8': 'calculator',
+                    'F9': 'settings'
+                };
+                if (tabMap[e.key]) {
+                    e.preventDefault();
+                    const btn = document.querySelector(`button[data-tab="${tabMap[e.key]}"]`);
+                    if(btn) btn.click();
+                    return;
+                }
+            }
+            
             // Do not trigger shortcuts if user is typing inside an input/textarea (unless it's Alt/Ctrl based)
             const isInputFocus = e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT';
             
@@ -13498,7 +13743,7 @@
                     <div><kbd>Alt</kbd> + <kbd>R</kbd> : Reports</div>
                     <div><kbd>Alt</kbd> + <kbd>P</kbd> : Products</div>
                     <div><kbd>Alt</kbd> + <kbd>C</kbd> : Calculator</div>
-                    <div><kbd>Alt</kbd> + <kbd>N</kbd> : Cash Denomination</div>
+                    <div><kbd>Alt</kbd> + <kbd>N</kbd> : Day Closing</div>
                 </div>
                 
                 <h4 style="margin-bottom: 5px;">Actions (Global)</h4>
@@ -15194,13 +15439,509 @@
             populateUnitDropdowns();
         }
 
-        // Initialize on load
+        // --- NEW REPORTS DASHBOARD LOGIC ---
+        let globalFilteredSales = [];
+        let itemWiseSortColumn = 'date';
+        let itemWiseSortAsc = false;
+
+        function handleGlobalDateFilterChange() {
+            const filter = document.getElementById('globalReportDateFilter').value;
+            const customContainer = document.getElementById('globalReportCustomDateContainer');
+            if (filter === 'custom') {
+                customContainer.style.display = 'flex';
+            } else {
+                customContainer.style.display = 'none';
+                generateOnScreenReports();
+            }
+        }
+
+        function searchGlobalReportCustomer(query) {
+            query = query.toLowerCase().trim();
+            const resultsDropdown = document.getElementById('globalReportCustomerResults');
+            if (query.length < 2) {
+                resultsDropdown.style.display = 'none';
+                return;
+            }
+
+            const matched = [];
+            if ("walk-in customer".includes(query) || "walk in".includes(query)) {
+                matched.push({ id: 'walk-in', name: 'Walk-in Customer', phone: '-', gstin: '-' });
+            }
+
+            customers.forEach(c => {
+                if ((c.name && c.name.toLowerCase().includes(query)) ||
+                    (c.phone && c.phone.includes(query)) ||
+                    (c.gstin && c.gstin.toLowerCase().includes(query))) {
+                    matched.push(c);
+                }
+            });
+
+            if (matched.length === 0) {
+                resultsDropdown.innerHTML = `<div style="padding: 10px; color: #666;">No customer found.</div>`;
+            } else {
+                resultsDropdown.innerHTML = matched.map(c => `
+                    <div class="combobox-option" onclick="selectGlobalReportCustomer('${c.id}', '${c.name.replace(/'/g, "\\'")}')">
+                        <div style="font-weight: bold;">${c.name}</div>
+                        <div style="font-size: 12px; color: #666;">📞 ${c.phone || '-'} | 🏢 ${c.gstin || '-'}</div>
+                    </div>
+                `).join('');
+            }
+            resultsDropdown.style.display = 'block';
+        }
+
+        function selectGlobalReportCustomer(id, name) {
+            document.getElementById('globalReportCustomerId').value = id;
+            document.getElementById('globalReportSelectedCustomerName').innerText = name;
+            
+            document.getElementById('globalReportCustomerSearch').style.display = 'none';
+            document.getElementById('globalReportCustomerResults').style.display = 'none';
+            document.getElementById('globalReportSelectedCustomerContainer').style.display = 'flex';
+            
+            generateOnScreenReports();
+        }
+
+        function clearGlobalReportCustomer() {
+            document.getElementById('globalReportCustomerId').value = '';
+            document.getElementById('globalReportCustomerSearch').value = '';
+            
+            document.getElementById('globalReportCustomerSearch').style.display = 'block';
+            document.getElementById('globalReportSelectedCustomerContainer').style.display = 'none';
+            document.getElementById('globalReportCustomerStats').style.display = 'none';
+            
+            generateOnScreenReports();
+        }
+
+        function switchReportSubTab(tabName) {
+            document.querySelectorAll('.report-sub-tab').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.style.borderBottomColor = 'transparent';
+                el.style.color = '#495057';
+            });
+            
+            document.getElementById('subTab' + tabName.charAt(0).toUpperCase() + tabName.slice(1)).style.display = 'block';
+            
+            const activeBtn = document.getElementById('tabBtn' + tabName.charAt(0).toUpperCase() + tabName.slice(1));
+            if(activeBtn) {
+                activeBtn.style.borderBottomColor = '#007bff';
+                activeBtn.style.color = '#007bff';
+            }
+        }
+
+        function getGlobalDateRange() {
+            const filter = document.getElementById('globalReportDateFilter').value;
+            const now = new Date();
+            let start = new Date(now);
+            let end = new Date(now);
+
+            start.setHours(0, 0, 0, 0);
+            end.setHours(23, 59, 59, 999);
+
+            if (filter === 'yesterday') {
+                start.setDate(start.getDate() - 1);
+                end.setDate(end.getDate() - 1);
+            } else if (filter === 'this_week') {
+                const day = start.getDay();
+                const diff = start.getDate() - day + (day == 0 ? -6 : 1);
+                start.setDate(diff);
+            } else if (filter === 'this_month') {
+                start.setDate(1);
+            } else if (filter === 'last_month') {
+                start.setMonth(start.getMonth() - 1);
+                start.setDate(1);
+                end.setDate(0);
+            } else if (filter === 'custom') {
+                const s = document.getElementById('globalReportStartDate').value;
+                const e = document.getElementById('globalReportEndDate').value;
+                if (s) start = new Date(s + 'T00:00:00');
+                if (e) {
+                    end = new Date(e + 'T23:59:59');
+                } else {
+                    end = new Date(start);
+                    end.setHours(23,59,59,999);
+                }
+            }
+            return { start, end };
+        }
+
+        function generateOnScreenReports() {
+            const { start, end } = getGlobalDateRange();
+            const customerId = document.getElementById('globalReportCustomerId').value;
+
+            globalFilteredSales = sales.filter(sale => {
+                const saleDate = new Date(sale.date);
+                if (saleDate < start || saleDate > end) return false;
+                
+                if (customerId) {
+                    if (customerId === 'walk-in') {
+                        if (sale.customerId && sale.customerId.trim() !== '') return false;
+                    } else {
+                        if (sale.customerId !== customerId) return false;
+                    }
+                }
+                return true;
+            });
+
+            renderBillWiseReport();
+            renderItemWiseReport();
+            renderSalesSummaryReport();
+            
+            if (customerId) {
+                renderCustomerStats(globalFilteredSales);
+            }
+        }
+
+        function renderCustomerStats(filteredSales) {
+            const statsDiv = document.getElementById('globalReportCustomerStats');
+            if(filteredSales.length === 0) {
+                document.getElementById('customerStatBills').innerText = '0';
+                document.getElementById('customerStatTotal').innerText = '₹0.00';
+                document.getElementById('customerStatDiscount').innerText = '₹0.00';
+                document.getElementById('customerStatLastPurchase').innerText = '-';
+            } else {
+                const uniqueBills = new Set();
+                let total = 0;
+                let lastDate = new Date(0);
+                
+                filteredSales.forEach(s => {
+                    if(!uniqueBills.has(s.receiptNumber)) {
+                        uniqueBills.add(s.receiptNumber);
+                    }
+                    total += s.total;
+                    const d = new Date(s.date);
+                    if(d > lastDate) lastDate = d;
+                });
+                
+                const billGroup = {};
+                filteredSales.forEach(s => {
+                    if(!billGroup[s.receiptNumber]) {
+                        billGroup[s.receiptNumber] = { discount: s.discount || 0 };
+                    }
+                });
+                const totalDiscount = Object.values(billGroup).reduce((sum, b) => sum + b.discount, 0);
+
+                document.getElementById('customerStatBills').innerText = Object.keys(billGroup).length;
+                document.getElementById('customerStatTotal').innerText = `₹${total.toFixed(2)}`;
+                document.getElementById('customerStatDiscount').innerText = `₹${totalDiscount.toFixed(2)}`;
+                document.getElementById('customerStatLastPurchase').innerText = lastDate.toLocaleString();
+            }
+            statsDiv.style.display = 'flex';
+        }
+
+        function renderBillWiseReport() {
+            const tbody = document.getElementById('billWiseReportBody');
+            const billMap = {};
+            
+            globalFilteredSales.forEach(sale => {
+                if (!billMap[sale.receiptNumber]) {
+                    billMap[sale.receiptNumber] = {
+                        date: sale.date,
+                        billNo: sale.receiptNumber,
+                        customer: sale.customerName || 'Walk-in Customer',
+                        gstin: sale.customerGSTIN || '-',
+                        subtotal: 0,
+                        discount: sale.discount || 0,
+                        taxable: 0,
+                        cgst: 0,
+                        sgst: 0,
+                        igst: 0,
+                        total: 0,
+                        payment: sale.paymentMethod || 'Cash Only',
+                        rawDate: new Date(sale.date)
+                    };
+                }
+                const b = billMap[sale.receiptNumber];
+                const isInterState = sale.taxType === 'inter-state';
+                let taxable = (sale.price * sale.quantity);
+                if(sale.gstRate > 0) {
+                    taxable = taxable / (1 + (sale.gstRate/100));
+                }
+                b.subtotal += (sale.price * sale.quantity);
+                b.taxable += taxable;
+                b.total += sale.total;
+                
+                if (sale.gstRate > 0) {
+                    const taxAmt = sale.total - taxable;
+                    if (isInterState) {
+                        b.igst += taxAmt;
+                    } else {
+                        b.cgst += (taxAmt / 2);
+                        b.sgst += (taxAmt / 2);
+                    }
+                }
+            });
+
+            const bills = Object.values(billMap).sort((a,b) => b.rawDate - a.rawDate);
+            
+            if (bills.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="13" class="text-center">No bills found for the selected criteria.</td></tr>`;
+                document.getElementById('billWiseTotals').innerHTML = '';
+                return;
+            }
+
+            let totBills = 0, totSub = 0, totDisc = 0, totTaxable = 0, totCGST = 0, totSGST = 0, totIGST = 0, totTotal = 0;
+
+            tbody.innerHTML = bills.map(b => {
+                totBills++;
+                totSub += b.subtotal;
+                totDisc += b.discount;
+                
+                return `<tr>
+                    <td>${new Date(b.date).toLocaleString()}</td>
+                    <td>${b.billNo}</td>
+                    <td>${b.customer}</td>
+                    <td class="gst-field">${b.gstin}</td>
+                    <td>₹${b.subtotal.toFixed(2)}</td>
+                    <td>₹${b.discount.toFixed(2)}</td>
+                    <td class="gst-field">₹${(b.total - b.cgst - b.sgst - b.igst).toFixed(2)}</td>
+                    <td class="gst-field">₹${b.cgst.toFixed(2)}</td>
+                    <td class="gst-field">₹${b.sgst.toFixed(2)}</td>
+                    <td class="gst-field">₹${b.igst.toFixed(2)}</td>
+                    <td>₹${b.total.toFixed(2)}</td>
+                    <td>${b.payment}</td>
+                    <td><button class="btn btn-sm btn-info" onclick="document.getElementById('billSearchInput').value='${b.billNo}'; searchBill(); document.getElementById('billSearchInput').scrollIntoView();">👁️ View</button></td>
+                </tr>`;
+            }).join('');
+
+            bills.forEach(b => {
+                totCGST += b.cgst;
+                totSGST += b.sgst;
+                totIGST += b.igst;
+                totTotal += b.total;
+            });
+
+            document.getElementById('billWiseTotals').innerHTML = `
+                <div>Total Bills: ${totBills}</div>
+                <div>Gross Amount: ₹${totSub.toFixed(2)}</div>
+                <div style="color:red;">Total Discount: ₹${totDisc.toFixed(2)}</div>
+                <div class="gst-field">CGST: ₹${totCGST.toFixed(2)}</div>
+                <div class="gst-field">SGST: ₹${totSGST.toFixed(2)}</div>
+                <div class="gst-field">IGST: ₹${totIGST.toFixed(2)}</div>
+                <div style="color:green; font-size:1.1em;">Total Sales: ₹${totTotal.toFixed(2)}</div>
+            `;
+            if(typeof updateGstVisibility === 'function') updateGstVisibility();
+        }
+
+        function sortItemWiseReport(col) {
+            if (itemWiseSortColumn === col) {
+                itemWiseSortAsc = !itemWiseSortAsc;
+            } else {
+                itemWiseSortColumn = col;
+                itemWiseSortAsc = true;
+            }
+            renderItemWiseReport();
+        }
+
+        function renderItemWiseReport() {
+            const tbody = document.getElementById('itemWiseReportBody');
+            
+            let items = [...globalFilteredSales];
+            
+            items.sort((a, b) => {
+                let valA, valB;
+                if (itemWiseSortColumn === 'date') { valA = new Date(a.date); valB = new Date(b.date); }
+                else if (itemWiseSortColumn === 'product') { valA = a.productName; valB = b.productName; }
+                else if (itemWiseSortColumn === 'qty') { valA = a.quantity; valB = b.quantity; }
+                else if (itemWiseSortColumn === 'total') { valA = a.total; valB = b.total; }
+                
+                if (valA < valB) return itemWiseSortAsc ? -1 : 1;
+                if (valA > valB) return itemWiseSortAsc ? 1 : -1;
+                return 0;
+            });
+
+            if (items.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="12" class="text-center">No items found.</td></tr>`;
+                document.getElementById('itemWiseTotals').innerHTML = '';
+                return;
+            }
+
+            let totQty = 0, totSales = 0;
+
+            tbody.innerHTML = items.map(i => {
+                totQty += i.quantity;
+                totSales += i.total;
+                return `<tr>
+                    <td>${new Date(i.date).toLocaleString()}</td>
+                    <td>${i.productName}</td>
+                    <td>${i.barcode || '-'}</td>
+                    <td class="gst-field">${i.hsn || '-'}</td>
+                    <td class="gst-field">${i.gstRate || '0'}%</td>
+                    <td>${i.unit || 'Piece'}</td>
+                    <td>${i.quantity}</td>
+                    <td>₹${i.price.toFixed(2)}</td>
+                    <td>₹${i.total.toFixed(2)}</td>
+                    <td>${i.receiptNumber}</td>
+                    <td>${i.customerName || 'Walk-in'}</td>
+                    <td>${i.paymentMethod}</td>
+                </tr>`;
+            }).join('');
+
+            document.getElementById('itemWiseTotals').innerHTML = `
+                <div>Total Line Items: ${items.length}</div>
+                <div>Total Quantity Sold: ${totQty}</div>
+                <div style="color:green; font-size:1.1em;">Gross Item Sales: ₹${totSales.toFixed(2)}</div>
+            `;
+            if(typeof updateGstVisibility === 'function') updateGstVisibility();
+        }
+
+        function renderSalesSummaryReport() {
+            const tbody = document.getElementById('salesSummaryReportBody');
+            const period = document.getElementById('summaryPeriodSelector').value;
+            
+            const summaryMap = {};
+            
+            globalFilteredSales.forEach(sale => {
+                const d = new Date(sale.date);
+                let key = '';
+                if (period === 'daily') {
+                    key = d.toLocaleDateString();
+                } else if (period === 'weekly') {
+                    const day = d.getDay();
+                    const start = new Date(d);
+                    start.setDate(d.getDate() - day + (day == 0 ? -6 : 1));
+                    const end = new Date(start);
+                    end.setDate(start.getDate() + 6);
+                    key = `${start.toLocaleDateString()} - ${end.toLocaleDateString()}`;
+                } else if (period === 'monthly') {
+                    key = d.toLocaleString('default', { month: 'long', year: 'numeric' });
+                }
+                
+                if (!summaryMap[key]) {
+                    summaryMap[key] = {
+                        period: key, bills: new Set(), items: 0, subtotal: 0, discount: 0, taxable: 0, cgst: 0, sgst: 0, igst: 0, total: 0, rawDate: d
+                    };
+                }
+                const s = summaryMap[key];
+                s.bills.add(sale.receiptNumber);
+                s.items += sale.quantity;
+                s.total += sale.total;
+                s.subtotal += (sale.price * sale.quantity);
+                
+                const isInterState = sale.taxType === 'inter-state';
+                let taxable = (sale.price * sale.quantity);
+                if(sale.gstRate > 0) taxable = taxable / (1 + (sale.gstRate/100));
+                s.taxable += taxable;
+                
+                if (sale.gstRate > 0) {
+                    const taxAmt = sale.total - taxable;
+                    if (isInterState) s.igst += taxAmt;
+                    else { s.cgst += taxAmt/2; s.sgst += taxAmt/2; }
+                }
+            });
+
+            const globalBillDiscMap = {};
+            globalFilteredSales.forEach(sale => {
+                if(!globalBillDiscMap[sale.receiptNumber]) globalBillDiscMap[sale.receiptNumber] = { disc: sale.discount||0, date: sale.date };
+            });
+            
+            Object.keys(globalBillDiscMap).forEach(billNo => {
+                const d = new Date(globalBillDiscMap[billNo].date);
+                let key = '';
+                if (period === 'daily') key = d.toLocaleDateString();
+                else if (period === 'weekly') {
+                    const day = d.getDay();
+                    const start = new Date(d);
+                    start.setDate(d.getDate() - day + (day == 0 ? -6 : 1));
+                    const end = new Date(start);
+                    end.setDate(start.getDate() + 6);
+                    key = `${start.toLocaleDateString()} - ${end.toLocaleDateString()}`;
+                } else if (period === 'monthly') key = d.toLocaleString('default', { month: 'long', year: 'numeric' });
+                
+                if(summaryMap[key]) summaryMap[key].discount += globalBillDiscMap[billNo].disc;
+            });
+
+            const arr = Object.values(summaryMap).sort((a,b) => b.rawDate - a.rawDate);
+            
+            if (arr.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="10" class="text-center">No data available.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = arr.map(s => `
+                <tr>
+                    <td><strong>${s.period}</strong></td>
+                    <td>${s.bills.size}</td>
+                    <td>${s.items}</td>
+                    <td>₹${s.subtotal.toFixed(2)}</td>
+                    <td>₹${s.discount.toFixed(2)}</td>
+                    <td class="gst-field">₹${(s.total - s.cgst - s.sgst - s.igst).toFixed(2)}</td>
+                    <td class="gst-field">₹${s.cgst.toFixed(2)}</td>
+                    <td class="gst-field">₹${s.sgst.toFixed(2)}</td>
+                    <td class="gst-field">₹${s.igst.toFixed(2)}</td>
+                    <td><strong>₹${s.total.toFixed(2)}</strong></td>
+                </tr>
+            `).join('');
+            if(typeof updateGstVisibility === 'function') updateGstVisibility();
+        }
+
+        function exportFilteredReport(type) {
+            if (globalFilteredSales.length === 0) {
+                showAlert('No sales data to export for selected criteria', '⚠️');
+                return;
+            }
+            
+            if (type === 'bills') {
+                const billMap = {};
+                globalFilteredSales.forEach(sale => {
+                    if (!billMap[sale.receiptNumber]) {
+                        billMap[sale.receiptNumber] = {
+                            date: sale.date, billNo: sale.receiptNumber, customer: sale.customerName || 'Walk-in Customer',
+                            subtotal: 0, discount: sale.discount || 0, total: 0, payment: sale.paymentMethod
+                        };
+                    }
+                    billMap[sale.receiptNumber].subtotal += (sale.price * sale.quantity);
+                    billMap[sale.receiptNumber].total += sale.total;
+                });
+                
+                let csv = 'Date,Time,Bill No,Customer,Subtotal,Discount,Total,Payment Method\\n';
+                Object.values(billMap).forEach(b => {
+                    const d = new Date(b.date);
+                    csv += `${d.toLocaleDateString()},${d.toLocaleTimeString()},${b.billNo},"${b.customer}",${b.subtotal.toFixed(2)},${b.discount.toFixed(2)},${b.total.toFixed(2)},${b.payment}\\n`;
+                });
+                triggerCSVDownload(csv, 'bill_wise_sales');
+            } else if (type === 'items') {
+                let csv = 'Date,Time,Barcode,Product,HSN,GST%,Unit,Quantity,Unit Price,Total,Bill No,Customer,Payment Method\\n';
+                globalFilteredSales.forEach(sale => {
+                    const d = new Date(sale.date);
+                    csv += `${d.toLocaleDateString()},${d.toLocaleTimeString()},${sale.barcode||''},"${sale.productName}",${sale.hsn||''},${sale.gstRate||0}%,${sale.unit||''},${sale.quantity},${sale.price},${sale.total},${sale.receiptNumber},"${sale.customerName||'Walk-in Customer'}",${sale.paymentMethod}\\n`;
+                });
+                triggerCSVDownload(csv, 'item_wise_sales');
+            }
+        }
+
+        function triggerCSVDownload(csvContent, prefix) {
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${prefix}_report.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('#globalReportCustomerSearch') && !e.target.closest('#globalReportCustomerResults')) {
+                const el = document.getElementById('globalReportCustomerResults');
+                if (el) el.style.display = 'none';
+            }
+        });
+
+        // Hook into switchTab
+        if(typeof switchTab === 'function') {
+            const _origSwitchTab = switchTab;
+            window.switchTab = function(tabId, btn) {
+                _origSwitchTab(tabId, btn);
+                if(tabId === 'reports') {
+                    generateOnScreenReports();
+                }
+            };
+        }
+
+        // Initialize Master Data on load
         document.addEventListener('DOMContentLoaded', () => {
             populateCategoryDropdowns();
             populateUnitDropdowns();
             renderMasterDataSettings();
         });
-
     </script>
 </body>
 </html>
