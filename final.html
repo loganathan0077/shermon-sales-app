@@ -1509,6 +1509,7 @@
                     style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                     <h2 class="section-title" style="margin: 0;">Current Inventory Status</h2>
                     <div class="responsive-actions" style="display: flex; gap: 10px;">
+                        <button class="btn btn-warning" onclick="handleAddInventoryFromInventory()">➕ Add Inventory</button>
                         <button id="createPOBtn" class="btn btn-primary" onclick="startNewPO()">📝 Create PO</button>
                         <button class="btn btn-secondary" onclick="openPOHistoryModal()">📜 PO History</button>
                         <button class="btn btn-success" onclick="exportInventoryCSV()">📥 Export CSV</button>
@@ -5051,6 +5052,10 @@
                 window.isAddingFromSale = false;
                 closePurchaseModal();
                 togglePurchaseBillElements(true); // reset for normal purchase flow
+            } else if (window.isAddingFromInventory) {
+                window.isAddingFromInventory = false;
+                closePurchaseModal();
+                togglePurchaseBillElements(true); // reset for normal purchase flow
             }
         }
 
@@ -5249,6 +5254,10 @@
                                 }
                             }, 100);
                         }, 300);
+                    } else if (window.isAddingFromInventory) {
+                        window.isAddingFromInventory = false;
+                        closePurchaseModal();
+                        togglePurchaseBillElements(true);
                     }
                 };
 
@@ -6659,6 +6668,17 @@
                 document.getElementById('saleProductSearch').focus();
             }
             populateSaleProductSelect(''); // Show all products again
+        }
+
+        function handleAddInventoryFromInventory() {
+            window.isAddingFromInventory = true;
+            document.getElementById('purchaseModal').style.display = 'flex';
+            
+            togglePurchaseBillElements(false);
+            const titleEl = document.querySelector('#purchaseModal h2');
+            if (titleEl) titleEl.innerHTML = '📦 Add Inventory';
+            
+            showPurchaseAddNewProductForm();
         }
 
         function handleAddInventoryFromSale() {
@@ -12691,10 +12711,13 @@
                             if(pSearch) { pSearch.focus(); pSearch.select(); }
                         }
                         break;
-                    case 'KeyV': // Add Inventory in Sales
+                    case 'KeyV': // Add Inventory
                         if (document.getElementById('sales').classList.contains('active')) {
                             e.preventDefault();
                             handleAddInventoryFromSale();
+                        } else if (document.getElementById('inventory').classList.contains('active')) {
+                            e.preventDefault();
+                            handleAddInventoryFromInventory();
                         }
                         break;
                     case 'KeyX': // Clear shortcut
