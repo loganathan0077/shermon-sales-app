@@ -3402,10 +3402,10 @@
                         <input type="number" id="purchaseItemPrice"
                             style="width: 80px; padding: 5px; border-radius: 4px; border: 1px solid #ced4da;">
                     </div>
-                    <div style="display: flex; align-items: center; gap: 5px;">
-                        <label>Sell Price (₹):</label>
-                        <input type="number" id="purchaseItemSellingPrice"
-                            style="width: 80px; padding: 5px; border-radius: 4px; border: 1px solid #ced4da;">
+                    <div style="display: flex; align-items: center; gap: 5px;" class="gst-field">
+                        <label>GST (%):</label>
+                        <input type="number" id="purchaseItemGST"
+                            style="width: 60px; padding: 5px; border-radius: 4px; border: 1px solid #ced4da;">
                     </div>
                     <button class="btn btn-success" onclick="addPurchaseItem()">Add to Bill</button>
                     <button class="btn btn-danger purchase-selection-remove-btn" onclick="cancelPurchaseSelection()"
@@ -4516,9 +4516,10 @@
                 document.getElementById('purchaseSearchResults').style.display = 'none';
                 document.getElementById('purchaseSearchInput').value = ''; // Clear search
                 document.getElementById('purchaseQty').value = 1;
-                // Default to Cost Price, fallback to Selling Price (for legacy items), else 0
+                // Default to Cost Price
                 document.getElementById('purchaseItemPrice').value = selectedPurchaseProduct.costPrice || 0;
-                document.getElementById('purchaseItemSellingPrice').value = selectedPurchaseProduct.price || 0;
+                const gstInput = document.getElementById('purchaseItemGST');
+                if (gstInput) gstInput.value = selectedPurchaseProduct.gstRate || 0;
                 // Focus qty
                 document.getElementById('purchaseQty').focus();
             }
@@ -4529,7 +4530,8 @@
             if (!selectedPurchaseProduct) return;
             const qty = parseInt(document.getElementById('purchaseQty').value);
             const price = parseFloat(document.getElementById('purchaseItemPrice').value) || 0;
-            const sellingPrice = parseFloat(document.getElementById('purchaseItemSellingPrice').value) || 0;
+            const gstEl = document.getElementById('purchaseItemGST');
+            const gstRate = gstEl ? (parseFloat(gstEl.value) || 0) : (selectedPurchaseProduct.gstRate || 0);
 
             if (qty < 1) return;
 
@@ -4537,7 +4539,7 @@
             if (existing) {
                 existing.qty += qty;
                 existing.price = price;
-                existing.sellingPrice = sellingPrice;
+                existing.gstRate = gstRate;
                 existing.total = existing.qty * price;
             } else {
                 purchaseCart.push({
@@ -4546,9 +4548,8 @@
                     name: selectedPurchaseProduct.name,
                     qty: qty,
                     price: price,
-                    sellingPrice: sellingPrice,
                     total: qty * price,
-                    gstRate: selectedPurchaseProduct.gstRate || 0,
+                    gstRate: gstRate,
                     hsn: selectedPurchaseProduct.hsn || ''
                 });
             }
@@ -5228,8 +5229,8 @@
                     // Default to Cost Price
                     if (priceInput) priceInput.value = newProd.costPrice || 0;
 
-                    const sellingPriceInput = document.getElementById('purchaseItemSellingPrice');
-                    if (sellingPriceInput) sellingPriceInput.value = newProd.price || 0;
+                    const gstInput = document.getElementById('purchaseItemGST');
+                    if (gstInput) gstInput.value = newProd.gstRate || 0;
 
                     const qtyInput = document.getElementById('purchaseQty');
                     if (qtyInput) qtyInput.value = 1;
