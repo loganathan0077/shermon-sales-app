@@ -36,5 +36,8 @@
             "target": "dmg",
             "icon": "icon-512.png"
         }
+    },
+    "dependencies": {
+        "puppeteer": "^25.10.0"
     }
 }
