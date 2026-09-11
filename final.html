@@ -2393,8 +2393,9 @@
                                 restore from previous backups</p>
                         </div>
                         <div style="display: flex; gap: 10px;">
-                            <button class="btn btn-info" onclick="backupData()" title="Download backup of all data">
-                                💾 Backup Data
+                            <button class="btn btn-info" style="display:flex; flex-direction:column; align-items:center;" onclick="backupData()" title="Download backup of all data">
+                                <span>💾 Full System Backup</span>
+                                <span style="font-size:10px; opacity:0.8;">Includes all business data, settings and images</span>
                             </button>
                             <button class="btn btn-warning admin-only"
                                 onclick="document.getElementById('restoreFileInput').click()"
@@ -4886,7 +4887,11 @@
                 dayClosings: dayClosings,
                 customCategories: JSON.parse(localStorage.getItem('customCategories')) || [],
                 receiptCounters: JSON.parse(localStorage.getItem('receiptCounters')) || {},
-                negativeChangeCount: negativeChangeCount
+                negativeChangeCount: negativeChangeCount,
+                settings: JSON.parse(localStorage.getItem('settings')) || null,
+                pettyCashTransactions: JSON.parse(localStorage.getItem('pettyCashTransactions') || '[]'),
+                pettyCashOpening: JSON.parse(localStorage.getItem('pettyCashOpening') || '{"cash":0,"bank":0}'),
+                pettyCashCategories: JSON.parse(localStorage.getItem('pettyCashCategories') || 'null')
             };
 
             const jsonString = JSON.stringify(backupData, null, 2);
@@ -4968,6 +4973,16 @@
                             localStorage.setItem('customCategories', JSON.stringify(backupData.customCategories || []));
                             localStorage.setItem('receiptCounters', JSON.stringify(backupData.receiptCounters || {}));
                             localStorage.setItem('negativeChangeCount', negativeChangeCount.toString());
+
+                            if (backupData.settings) {
+                                localStorage.setItem('settings', JSON.stringify(backupData.settings));
+                                if (typeof applySettingsToUI === 'function') {
+                                    applySettingsToUI(backupData.settings);
+                                }
+                            }
+                            if (backupData.pettyCashTransactions) localStorage.setItem('pettyCashTransactions', JSON.stringify(backupData.pettyCashTransactions));
+                            if (backupData.pettyCashOpening) localStorage.setItem('pettyCashOpening', JSON.stringify(backupData.pettyCashOpening));
+                            if (backupData.pettyCashCategories) localStorage.setItem('pettyCashCategories', JSON.stringify(backupData.pettyCashCategories));
 
                             // Sync to Firestore
                             if (window.currentUserId) {
