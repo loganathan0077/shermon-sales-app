@@ -4678,11 +4678,17 @@
                 document.getElementById('addItemForm').reset();
                 if(typeof clearCustomerSelection === 'function') clearCustomerSelection();
                 if(document.getElementById('customerName')) document.getElementById('customerName').value = '';
-                document.getElementById('customerAmount').value = '';
+                
                 document.getElementById('otherPaymentAmount').value = '0';
-                document.getElementById('changeAmount').value = '';
                 document.getElementById('discountAmount').value = '0';
+                document.getElementById('courierCharges').value = '0';
+                document.getElementById('paymentMethod').value = 'cash';
+                
                 updateCartDisplay();
+                if (typeof togglePaymentFields === 'function') togglePaymentFields();
+                
+                document.getElementById('customerAmount').value = '';
+                document.getElementById('changeAmount').value = '';
                 console.log('Cart cleared successfully');
                 showAlert('Cart cleared successfully!', '✅');
             });
@@ -8856,14 +8862,17 @@
                         document.getElementById('addItemForm').reset();
                         if(typeof clearCustomerSelection === 'function') clearCustomerSelection();
                         if(document.getElementById('customerName')) document.getElementById('customerName').value = '';
-                        document.getElementById('customerAmount').value = '';
+                        
                         document.getElementById('otherPaymentAmount').value = '0';
-                        document.getElementById('changeAmount').value = '';
                         document.getElementById('discountAmount').value = '0'; // Reset Discount
                         document.getElementById('courierCharges').value = '0'; // Reset Courier
                         document.getElementById('paymentMethod').value = 'cash';
-                        togglePaymentFields();
+                        
                         updateCartDisplay();
+                        togglePaymentFields();
+                        
+                        document.getElementById('customerAmount').value = '';
+                        document.getElementById('changeAmount').value = '';
 
                         // Show receipt
                         showReceipt();
