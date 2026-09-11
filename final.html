@@ -1758,7 +1758,10 @@
                     <div id="existingCustomerSection" style="max-width: 500px;">
                         <div class="form-group" style="position: relative;">
                             <label>Search Customer</label>
-                            <input type="text" id="saleCustomerSearch" class="form-control" placeholder="Search by name, phone, or GSTIN... (Leave empty for Walk-in)" autocomplete="off" oninput="searchCustomers(this.value)" onkeydown="handleCustomerSearchKeydown(event)">
+                            <div style="display: flex; gap: 10px;">
+                                <input type="text" id="saleCustomerSearch" class="form-control" style="flex: 1;" placeholder="Search by name, phone, or GSTIN... (Leave empty for Walk-in)" autocomplete="off" oninput="searchCustomers(this.value)" onkeydown="handleCustomerSearchKeydown(event)">
+                                <button type="button" class="btn btn-success" onclick="openAddCustomerModal()" style="white-space: nowrap;">➕ Add <kbd style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 2px 4px; border-radius: 3px; font-size: 11px; margin-left: 5px; font-family: monospace;">Alt+M</kbd></button>
+                            </div>
                             <div id="customerSearchResults" class="custom-dropdown" style="display: none; position: absolute; width: 100%; top: 100%; left: 0; z-index: 1000; max-height: 250px; overflow-y: auto;"></div>
                         </div>
                         <div id="selectedCustomerDetails" style="display: none; margin-top: 10px; padding: 15px; background: #fff; border-radius: 8px; border: 1px solid #cce5ff; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
@@ -3837,7 +3840,7 @@
                 <input type="text" id="customerSearchInput" placeholder="🔍 Search customer..." oninput="renderCustomerTable()" class="form-control" style="flex: 1; min-width: 250px; max-width: 400px; padding: 10px; font-size: 16px;">
                 <div style="display: flex; gap: 10px;">
                     <button class="btn btn-info" style="padding: 10px 15px; font-size: 16px;" onclick="exportCustomersCSV()">📥 Export Customers (CSV)</button>
-                    <button class="btn btn-success" style="padding: 10px 15px; font-size: 16px;" onclick="openAddCustomerModal()">➕ Add Customer</button>
+                    <button class="btn btn-success" style="padding: 10px 15px; font-size: 16px;" onclick="openAddCustomerModal()">➕ Add Customer <kbd style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 2px 4px; border-radius: 3px; font-size: 11px; margin-left: 5px; font-family: monospace;">Alt+M</kbd></button>
                 </div>
             </div>
             
@@ -14023,6 +14026,12 @@
                             handleAddInventoryFromInventory();
                         }
                         break;
+                    case 'KeyM': // Add Customer
+                        if (document.getElementById('sales').classList.contains('active')) {
+                            e.preventDefault();
+                            openAddCustomerModal();
+                        }
+                        break;
                     case 'KeyX': // Clear shortcut
                         if (document.getElementById('sales').classList.contains('active')) {
                             e.preventDefault();
@@ -14223,6 +14232,7 @@
                     <div><kbd>Alt</kbd> + <kbd>B</kbd> : Focus Quick Sale Barcode</div>
                     <div><kbd>Alt</kbd> + <kbd>A</kbd> : Focus Add Item to Sale</div>
                     <div><kbd>Alt</kbd> + <kbd>V</kbd> : Quick Add Inventory</div>
+                    <div><kbd>Alt</kbd> + <kbd>M</kbd> : Add New Customer</div>
                     <div><kbd>Enter</kbd> : Move to next logical field / Select Match</div>
                 </div>
                 
