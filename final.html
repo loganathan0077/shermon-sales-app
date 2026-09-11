@@ -3246,6 +3246,26 @@
                                         </table>
                                     </div>
                                 </div>
+                                <!-- Category Discounts Panel -->
+                                <div style="flex: 1; min-width: 300px; border: 1px solid #ddd; border-radius: 8px; padding: 15px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                        <h4 style="margin: 0;">🏷️ Category Discount Settings</h4>
+                                        <button class="btn btn-sm btn-primary" onclick="openCategoryDiscountModal()">➕ Add Category Discount</button>
+                                    </div>
+                                    <div style="max-height: 250px; overflow-y: auto; border: 1px solid #eee; border-radius: 4px;">
+                                        <table class="table" style="margin: 0; width: 100%;">
+                                            <thead style="position: sticky; top: 0; background: #fff;">
+                                                <tr>
+                                                    <th>Category</th>
+                                                    <th>Disc (%)</th>
+                                                    <th style="width: 80px; text-align: center;">Status</th>
+                                                    <th style="width: 130px; text-align: right;">Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="settingsCategoryDiscountsList"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -3257,6 +3277,35 @@
     </div>
 
     <!-- Scanner Modal -->
+    <div id="categoryDiscountModal" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2 id="categoryDiscountModalTitle">🏷️ Category Discount</h2>
+                <button class="modal-close" onclick="closeCategoryDiscountModal()">&times;</button>
+            </div>
+            <div class="form-group">
+                <label>Category <span style="color: red;">*</span></label>
+                <select id="catDiscCategory" class="form-control" required></select>
+            </div>
+            <div class="form-group">
+                <label>Default Discount (%) <span style="color: red;">*</span></label>
+                <input type="number" id="catDiscPercent" class="form-control" min="0" max="100" step="0.01" placeholder="e.g. 10" required>
+            </div>
+            <div class="form-group">
+                <label>Status</label>
+                <select id="catDiscStatus" class="form-control">
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                </select>
+            </div>
+            <input type="hidden" id="editingCategoryDiscountId">
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn btn-success" style="flex: 1;" onclick="saveCategoryDiscount()">💾 Save</button>
+                <button class="btn btn-danger" style="flex: 1;" onclick="closeCategoryDiscountModal()">❌ Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <div id="scannerModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -4481,6 +4530,7 @@
         let sales = JSON.parse(localStorage.getItem('sales')) || [];
         let stockHistory = JSON.parse(localStorage.getItem('stockHistory')) || [];
         let purchaseOrders = JSON.parse(localStorage.getItem('purchaseOrders')) || [];
+        let categoryDiscounts = JSON.parse(localStorage.getItem('categoryDiscounts')) || [];
         let draftSales = JSON.parse(localStorage.getItem('draftSales')) || []; // Initialize drafts
         let modalScanner = null;
         let currentScanMode = '';
@@ -4897,6 +4947,7 @@
                 calculatorHistory: calculatorHistory,
                 dayClosings: dayClosings,
                 customCategories: JSON.parse(localStorage.getItem('customCategories')) || [],
+                categoryDiscounts: JSON.parse(localStorage.getItem('categoryDiscounts')) || [],
                 receiptCounters: JSON.parse(localStorage.getItem('receiptCounters')) || {},
                 negativeChangeCount: negativeChangeCount,
                 settings: JSON.parse(localStorage.getItem('settings')) || null,
@@ -4982,6 +5033,7 @@
                             localStorage.setItem('dayClosings', JSON.stringify(dayClosings));
                             
                             localStorage.setItem('customCategories', JSON.stringify(backupData.customCategories || []));
+                            localStorage.setItem('categoryDiscounts', JSON.stringify(backupData.categoryDiscounts || []));
                             localStorage.setItem('receiptCounters', JSON.stringify(backupData.receiptCounters || {}));
                             localStorage.setItem('negativeChangeCount', negativeChangeCount.toString());
 
@@ -8025,6 +8077,18 @@
                 cart[existingItemIndex].quantity += quantity;
                 cart[existingItemIndex].total = cart[existingItemIndex].quantity * unitPrice;
             } else {
+                let defaultDiscountPercent = 0;
+                
+                // Priority: Product specific discount (if any in future) -> Category default -> 0%
+                if (product.discountPercent !== undefined) {
+                    defaultDiscountPercent = product.discountPercent;
+                } else if (product.category) {
+                    const catDiscount = categoryDiscounts.find(c => c.category === product.category && c.active);
+                    if (catDiscount) {
+                        defaultDiscountPercent = catDiscount.discount;
+                    }
+                }
+
                 cart.push({
                     productId: productId,
                     productName: product.name,
@@ -8033,6 +8097,7 @@
                     price: unitPrice,
                     quantity: quantity,
                     baseQuantity: unitQuantity, // Store multiplier
+                    discountPercent: defaultDiscountPercent,
                     total: quantity * unitPrice
                 });
             }
@@ -16020,6 +16085,28 @@
                     </tr>
                 `).join('');
             }
+            
+            renderCategoryDiscounts();
+        }
+
+        function renderCategoryDiscounts() {
+            const list = document.getElementById('settingsCategoryDiscountsList');
+            if (list) {
+                list.innerHTML = categoryDiscounts.map(cd => `
+                    <tr>
+                        <td>${cd.category}</td>
+                        <td>${cd.discount}%</td>
+                        <td style="text-align: center;">
+                            <span class="pc-badge ${cd.active ? 'income' : 'expense'}">${cd.active ? 'Active' : 'Inactive'}</span>
+                        </td>
+                        <td style="text-align: right; white-space: nowrap;">
+                            <button class="btn btn-sm btn-secondary" onclick="openCategoryDiscountModal('${cd.id}')" style="padding: 2px 6px;">✏️</button>
+                            <button class="btn btn-sm ${cd.active ? 'btn-danger' : 'btn-success'}" onclick="toggleCategoryDiscountStatus('${cd.id}')" style="padding: 2px 6px;">${cd.active ? 'Disable' : 'Enable'}</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteCategoryDiscount('${cd.id}')" style="padding: 2px 6px;">🗑️</button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
         }
 
         async function promptAddNewCategory() {
@@ -16106,6 +16193,97 @@
                 populateUnitDropdowns();
                 showAlert("Unit updated successfully!", "✅");
             }
+        }
+
+        function openCategoryDiscountModal(id = null) {
+            const catSelect = document.getElementById('catDiscCategory');
+            catSelect.innerHTML = masterCategories.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+            
+            document.getElementById('editingCategoryDiscountId').value = id || '';
+            
+            if (id) {
+                const cd = categoryDiscounts.find(c => c.id === id);
+                if (cd) {
+                    document.getElementById('categoryDiscountModalTitle').innerText = '✏️ Edit Category Discount';
+                    catSelect.value = cd.category;
+                    document.getElementById('catDiscPercent').value = cd.discount;
+                    document.getElementById('catDiscStatus').value = cd.active ? 'active' : 'inactive';
+                }
+            } else {
+                document.getElementById('categoryDiscountModalTitle').innerText = '➕ Add Category Discount';
+                document.getElementById('catDiscPercent').value = '';
+                document.getElementById('catDiscStatus').value = 'active';
+            }
+            
+            document.getElementById('categoryDiscountModal').style.display = 'flex';
+        }
+
+        function closeCategoryDiscountModal() {
+            document.getElementById('categoryDiscountModal').style.display = 'none';
+        }
+
+        function saveCategoryDiscount() {
+            const id = document.getElementById('editingCategoryDiscountId').value;
+            const category = document.getElementById('catDiscCategory').value;
+            const discountPercent = parseFloat(document.getElementById('catDiscPercent').value);
+            const status = document.getElementById('catDiscStatus').value === 'active';
+            
+            if (!category) {
+                showAlert('Please select a category.', '⚠️');
+                return;
+            }
+            if (isNaN(discountPercent) || discountPercent < 0 || discountPercent > 100) {
+                showAlert('Discount must be a number between 0 and 100.', '⚠️');
+                return;
+            }
+            
+            if (id) {
+                const cd = categoryDiscounts.find(c => c.id === id);
+                if (cd) {
+                    // Check if another config for same category exists
+                    if (categoryDiscounts.some(c => c.category === category && c.id !== id)) {
+                        showAlert('A discount configuration for this category already exists.', '⚠️');
+                        return;
+                    }
+                    cd.category = category;
+                    cd.discount = discountPercent;
+                    cd.active = status;
+                }
+            } else {
+                if (categoryDiscounts.some(c => c.category === category)) {
+                    showAlert('A discount configuration for this category already exists.', '⚠️');
+                    return;
+                }
+                categoryDiscounts.push({
+                    id: 'cd_' + Math.random().toString(36).substr(2, 9),
+                    category: category,
+                    discount: discountPercent,
+                    active: status
+                });
+            }
+            
+            localStorage.setItem('categoryDiscounts', JSON.stringify(categoryDiscounts));
+            renderCategoryDiscounts();
+            closeCategoryDiscountModal();
+            showAlert('Category discount saved successfully!', '✅');
+        }
+
+        function toggleCategoryDiscountStatus(id) {
+            const cd = categoryDiscounts.find(c => c.id === id);
+            if (cd) {
+                cd.active = !cd.active;
+                localStorage.setItem('categoryDiscounts', JSON.stringify(categoryDiscounts));
+                renderCategoryDiscounts();
+            }
+        }
+        
+        function deleteCategoryDiscount(id) {
+            showConfirm('Are you sure you want to delete this category discount?', () => {
+                categoryDiscounts = categoryDiscounts.filter(c => c.id !== id);
+                localStorage.setItem('categoryDiscounts', JSON.stringify(categoryDiscounts));
+                renderCategoryDiscounts();
+                showAlert('Category discount deleted.', '✅');
+            });
         }
 
         function toggleCategoryStatus(id) {
