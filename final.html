@@ -1860,6 +1860,44 @@
                                 <span id="negativeChangeText"></span> | Count: <span id="negativeChangeCount">0</span>
                             </div>
                         </div>
+                        <div id="creditPaymentGroup" style="display: none; padding: 15px; background: #fff5f5; border: 1px solid #fed7d7; border-radius: 8px; margin-top: 15px; grid-column: 1 / -1; width: 100%;">
+                            <h4 style="margin: 0 0 15px 0; color: #c53030; font-size: 15px; border-bottom: 1px solid #fed7d7; padding-bottom: 5px;">💳 Credit Details</h4>
+                            
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; align-items: start;">
+                                <div class="form-group">
+                                    <label>Initial Amount Paid (₹)</label>
+                                    <input type="number" id="creditAmountPaid" step="0.01" class="form-control" onchange="calculateChange()" oninput="calculateChange()" placeholder="e.g. 1000" value="0">
+                                </div>
+                                <div class="form-group">
+                                    <label>Outstanding Balance (₹)</label>
+                                    <input type="text" id="creditOutstanding" class="form-control" readonly style="font-weight: bold; color: #c53030; background: #fff5f5; border: 1px solid #fed7d7;" value="₹0.00">
+                                </div>
+                                
+                                <div style="display: flex; gap: 15px; flex-direction: column;">
+                                    <div class="form-group" id="inlineAdvancePaymentSection" style="display: block;">
+                                        <label>Initial Payment Method</label>
+                                        <select id="creditPaymentMethod" class="form-control" onchange="calculateChange()">
+                                            <option value="cash">Cash</option>
+                                            <option value="upi">UPI</option>
+                                            <option value="card">Card</option>
+                                            <option value="bank">Bank Transfer</option>
+                                            <option value="cheque">Cheque</option>
+                                            <option value="other">Other</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group" id="inlineReferenceGroup" style="display: none;">
+                                        <label>Reference No. (Optional)</label>
+                                        <input type="text" id="creditReference" class="form-control" placeholder="UPI Ref / Cheque No">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Due Date (Optional)</label>
+                                    <input type="date" id="creditDueDate" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                     <div style="display: flex; gap: 10px; margin-top: 20px;">
                         <button type="button" id="btnCompleteSale" class="btn btn-success" onclick="completeSale()" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.click();}">✅ Complete Sale</button>
@@ -2414,15 +2452,24 @@
 
             <!-- Product Setup Tab with Barcode -->
             <div id="products" class="tab-content">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
                     <h2 class="section-title" style="margin-bottom: 0px; border-bottom: none;">Product Management</h2>
-                    <div style="display: flex; gap: 10px;">
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                         <button class="btn btn-primary" onclick="openPurchaseModal()">➕ Purchase (Bill Entry)</button>
                         <button class="btn btn-info" onclick="openPurchaseHistoryModal()">📜 Purchase History</button>
                         <button class="btn btn-secondary" onclick="openSupplierManagementModal()">👤 Supplier Details</button>
                         <button class="btn btn-secondary" onclick="openCustomerManagementModal()">👥 Customer Details</button>
                     </div>
                 </div>
+
+                <div style="margin-bottom: 30px; padding: 15px; background: #fff3e0; border: 1px solid #ffcc80; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                    <h3 style="margin-top: 0; color: #e65100; font-size: 1.2em; border-bottom: 1px solid #ffe0b2; padding-bottom: 10px; margin-bottom: 15px;">Financial Tracking</h3>
+                    <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                        <button class="btn" onclick="switchTab('receivables')" style="flex: 1; padding: 12px; font-size: 1.1em; background: #f57c00; color: white; border: none; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); cursor: pointer;">💰 Customer Receivables</button>
+                        <button class="btn" onclick="switchTab('payables')" style="flex: 1; padding: 12px; font-size: 1.1em; background: #ef6c00; color: white; border: none; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); cursor: pointer;">💳 Supplier Payables</button>
+                    </div>
+                </div>
+                
                 <!-- Main Product Form Removed (Use Purchase Button) -->
 
                 <div
@@ -2499,6 +2546,92 @@
                             </tr>
                         </thead>
                         <tbody id="productsTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Receivables Tab -->
+            <div id="receivables" class="tab-content" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2 class="section-title" style="margin-bottom: 0;">📥 Accounts Receivable (Credit Sales)</h2>
+                    <button class="btn btn-secondary" onclick="switchTab('products')">⬅️ Back to Products</button>
+                </div>
+                
+                <div style="display: flex; gap: 15px; margin-bottom: 20px; align-items: center; flex-wrap: wrap; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                    <div style="flex: 1; min-width: 250px;">
+                        <input type="text" id="receivablesSearch" placeholder="🔍 Search Customer, Invoice..." class="form-control" oninput="renderReceivablesTable()">
+                    </div>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <label style="margin:0; font-weight: 500;">Status:</label>
+                        <select id="receivablesStatusFilter" class="form-control" style="width: auto;" onchange="renderReceivablesTable()">
+                            <option value="all">All</option>
+                            <option value="unpaid" selected>Unpaid / Partial</option>
+                            <option value="fully_paid">Fully Paid</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Invoice</th>
+                                <th>Customer</th>
+                                <th>Total Bill (₹)</th>
+                                <th>Paid (₹)</th>
+                                <th style="color: #c53030;">Outstanding (₹)</th>
+                                <th>Due Date</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="receivablesTableBody">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Payables Tab -->
+            <div id="payables" class="tab-content" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2 class="section-title" style="margin-bottom: 0;">📤 Accounts Payable (Credit Purchases)</h2>
+                    <button class="btn btn-secondary" onclick="switchTab('products')">⬅️ Back to Products</button>
+                </div>
+                
+                <div style="display: flex; gap: 15px; margin-bottom: 20px; align-items: center; flex-wrap: wrap; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                    <div style="flex: 1; min-width: 250px;">
+                        <input type="text" id="payablesSearch" placeholder="🔍 Search Supplier, Invoice..." class="form-control" oninput="renderPayablesTable()">
+                    </div>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <label style="margin:0; font-weight: 500;">Status:</label>
+                        <select id="payablesStatusFilter" class="form-control" style="width: auto;" onchange="renderPayablesTable()">
+                            <option value="all">All</option>
+                            <option value="unpaid" selected>Unpaid / Partial</option>
+                            <option value="fully_paid">Fully Paid</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Invoice</th>
+                                <th>Supplier</th>
+                                <th>Total Bill (₹)</th>
+                                <th>Paid (₹)</th>
+                                <th style="color: #c53030;">Outstanding (₹)</th>
+                                <th>Due Date</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="payablesTableBody">
+                            <!-- Populated by JS -->
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -3372,7 +3505,7 @@
                     </div>
                     <div class="form-group">
                         <label>Category</label>
-                        <select id="editProductCategory" required onchange="toggleEditCategoryInput()">
+                        <select id="editProductCategory" required>
                             <option value="">Select Category...</option>
                             <option value="BAGS & TRAVEL ACCESSORIES">BAGS & TRAVEL ACCESSORIES</option>
                             <option value="BEAUTY & PERSONAL CARE">BEAUTY & PERSONAL CARE</option>
@@ -3580,7 +3713,7 @@
                         </div>
                         <div class="form-group">
                             <label>Category</label>
-                            <select id="newProductCategory" onchange="toggleNewProductCategoryInput()">
+                            <select id="newProductCategory">
                                 <option value="">Select Category...</option>
                                 <option value="BAGS & TRAVEL ACCESSORIES">BAGS & TRAVEL ACCESSORIES</option>
                                 <option value="BEAUTY & PERSONAL CARE">BEAUTY & PERSONAL CARE</option>
@@ -3789,10 +3922,176 @@
             </div>
             <div id="purchaseBillItemCount" style="margin-top: 10px; color: #666;">Items: <span id="purchaseItemCount">0</span></div>
 
+            <!-- Purchase Payment Section -->
+            <div style="margin-top: 20px; padding: 15px; border: 1px solid #ced4da; border-radius: 8px; background: #f8f9fa;">
+                <h4 style="margin-top: 0;">Payment Details</h4>
+                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                    <div class="form-group" style="flex: 1; min-width: 200px;">
+                        <label>Payment Method</label>
+                        <select id="purchasePaymentMethod" class="form-control" onchange="togglePurchasePaymentFields()">
+                            <option value="cash" selected>Cash Only</option>
+                            <option value="bank">Bank Transfer</option>
+                            <option value="upi">UPI</option>
+                            <option value="card">Card</option>
+                            <option value="credit">Credit (Unpaid / Partial)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div id="purchaseCreditPaymentGroup" style="display: none; padding: 15px; background: #fff5f5; border: 1px solid #fed7d7; border-radius: 8px; margin-top: 15px;">
+                    <h5 style="margin: 0 0 10px 0; color: #c53030;">Credit Tracking</h5>
+                    <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                        <div class="form-group" style="flex: 1; min-width: 150px;">
+                            <label>Amount Paid Now (₹)</label>
+                            <input type="number" id="purchaseCreditAmountPaid" class="form-control" step="0.01" value="0" oninput="calculatePurchaseOutstanding()">
+                        </div>
+                        <div class="form-group" style="flex: 1; min-width: 150px;">
+                            <label>Outstanding (₹)</label>
+                            <input type="number" id="purchaseCreditOutstanding" class="form-control" step="0.01" readonly style="font-weight: bold; color: #c53030;" value="0">
+                        </div>
+                        <div class="form-group" style="flex: 1; min-width: 150px;">
+                            <label>Initial Payment Method</label>
+                            <select id="purchaseCreditPaymentMethod" class="form-control">
+                                <option value="cash">Cash</option>
+                                <option value="bank">Bank</option>
+                                <option value="upi">UPI</option>
+                                <option value="card">Card</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="flex: 1; min-width: 150px;">
+                            <label>Due Date (Optional)</label>
+                            <input type="date" id="purchaseCreditDueDate" class="form-control">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div id="purchaseBillActions" style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
                 <button class="btn btn-warning" onclick="clearPurchaseCart()">🗑️ Clear Form</button>
                 <button class="btn btn-success" onclick="savePurchase()">💾 Save Bill & Update Inventory</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Payment Details Modal -->
+    
+
+    <div id="paymentModal" class="modal" style="z-index: 2500;">
+        <div class="modal-content" style="max-width: 800px; width: 95%;">
+            <div class="modal-header">
+                <h2>💳 Payment Details</h2>
+                <button class="modal-close" onclick="closePaymentModal()">&times;</button>
+            </div>
+            
+            <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                <!-- Summary Card -->
+                <div style="flex: 1; min-width: 300px; background: #f8f9fa; padding: 20px; border-radius: 8px; border: 1px solid #dee2e6;">
+                    <h3 style="margin-top: 0; color: #495057; border-bottom: 1px solid #ced4da; padding-bottom: 10px;">Transaction Summary</h3>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+                        <div>
+                            <small style="color: #6c757d; display: block;">Invoice / Bill Number</small>
+                            <strong id="pm-invoice" style="font-size: 1.1em;">-</strong>
+                        </div>
+                        <div>
+                            <small style="color: #6c757d; display: block;">Date</small>
+                            <strong id="pm-date">-</strong>
+                        </div>
+                        <div style="grid-column: span 2;">
+                            <small style="color: #6c757d; display: block;" id="pm-entity-label">Customer / Supplier</small>
+                            <strong id="pm-entity-name" style="font-size: 1.1em;">-</strong>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; background: white; padding: 15px; border-radius: 6px; border: 1px solid #ced4da;">
+                        <div style="text-align: center;">
+                            <small style="color: #6c757d; display: block;">Total Bill</small>
+                            <strong id="pm-total" style="font-size: 1.2em; color: #212529;">₹0.00</strong>
+                        </div>
+                        <div style="text-align: center;">
+                            <small style="color: #6c757d; display: block;">Paid</small>
+                            <strong id="pm-paid" style="font-size: 1.2em; color: #28a745;">₹0.00</strong>
+                        </div>
+                        <div style="text-align: center;">
+                            <small style="color: #6c757d; display: block;">Outstanding</small>
+                            <strong id="pm-outstanding" style="font-size: 1.3em; color: #dc3545;">₹0.00</strong>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 15px; text-align: center;">
+                        <span id="pm-status-badge" class="badge" style="font-size: 1.1em; padding: 6px 12px; border-radius: 4px;">Unpaid</span>
+                    </div>
+                </div>
+
+                <!-- Add Payment Form -->
+                <div style="flex: 1; min-width: 300px;">
+                    <h3 style="margin-top: 0; color: #495057; border-bottom: 1px solid #ced4da; padding-bottom: 10px;">➕ Add Payment</h3>
+                    
+                    <div class="form-group" style="margin-top: 15px;">
+                        <label>Payment Amount (₹) <span style="color: red;">*</span></label>
+                        <input type="number" id="pm-new-amount" class="form-control" step="0.01" min="0.01" placeholder="Enter amount">
+                    </div>
+
+                    <div style="display: flex; gap: 15px;">
+                        <div class="form-group" style="flex: 1;">
+                            <label>Payment Date <span style="color: red;">*</span></label>
+                            <input type="date" id="pm-new-date" class="form-control">
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label>Payment Method <span style="color: red;">*</span></label>
+                            <select id="pm-new-method" class="form-control">
+                                <option value="cash" selected>Cash</option>
+                                <option value="upi">UPI</option>
+                                <option value="bank">Bank Transfer</option>
+                                <option value="card">Card</option>
+                                <option value="cheque">Cheque</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Reference / Transaction No. (Optional)</label>
+                        <input type="text" id="pm-new-ref" class="form-control" placeholder="e.g. UPI Ref / Cheque No">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Notes (Optional)</label>
+                        <input type="text" id="pm-new-notes" class="form-control" placeholder="Brief notes">
+                    </div>
+
+                    <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                        <button class="btn btn-secondary" onclick="closePaymentModal()">Close</button>
+                        <button class="btn btn-success" id="pm-submit-btn" onclick="submitPayment()">💾 Add Payment</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment History -->
+            <div style="margin-top: 30px; border-top: 2px solid #dee2e6; padding-top: 20px;">
+                <h3 style="margin-top: 0; color: #495057;">📜 Payment History</h3>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Amount (₹)</th>
+                                <th>Method</th>
+                                <th>Reference No.</th>
+                                <th>Notes</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pm-history-body">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Hidden context variables -->
+            <input type="hidden" id="pm-ctx-type">
+            <input type="hidden" id="pm-ctx-invoice">
         </div>
     </div>
 
@@ -3869,10 +4168,144 @@
                     <label>Notes</label>
                     <input type="text" id="newSupplierNotes" placeholder="Additional Notes">
                 </div>
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label>Opening Balance (₹)</label>
+                    <input type="number" id="newSupplierOpeningBalance" placeholder="0.00" step="0.01" min="0">
+                </div>
             </div>
             <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
                 <button class="btn btn-secondary" onclick="closeAddSupplierModal()">❌ Cancel</button>
                 <button class="btn btn-success" onclick="saveSupplier()">💾 Save Supplier</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Party Ledger Modal -->
+    <div id="partyLedgerModal" class="modal" style="z-index: 2000;">
+        <div class="modal-content" style="max-width: 1000px; width: 95%;">
+            <div class="modal-header">
+                <h2 id="pl-title">📖 Account Ledger</h2>
+                <button class="modal-close" onclick="closePartyLedgerModal()">&times;</button>
+            </div>
+            
+            <div id="printLedgerArea">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 15px;">
+                    <div>
+                        <h3 id="pl-party-name" style="margin: 0 0 5px 0; color: #004085;">Party Name</h3>
+                        <div style="color: #666; font-size: 14px;">
+                            <span id="pl-party-phone"></span> | 
+                            <span id="pl-party-gstin"></span>
+                        </div>
+                        <div id="pl-party-address" style="color: #666; font-size: 14px; margin-top: 5px;"></div>
+                    </div>
+                    <div style="text-align: right; background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #dee2e6;">
+                        <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Current Balance</div>
+                        <div id="pl-current-balance" style="font-size: 24px; font-weight: bold; color: #004085;">₹0.00</div>
+                    </div>
+                </div>
+
+                <div class="no-print" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label style="font-size: 12px;">From Date</label>
+                        <input type="date" id="pl-filter-from">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label style="font-size: 12px;">To Date</label>
+                        <input type="date" id="pl-filter-to">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label style="font-size: 12px;">Quick Range</label>
+                        <select id="pl-filter-range" onchange="applyLedgerQuickRange()">
+                            <option value="all">All Time</option>
+                            <option value="today">Today</option>
+                            <option value="week">This Week</option>
+                            <option value="month">This Month</option>
+                            <option value="year">This Year</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" onclick="renderCurrentLedger()" style="height: 38px;">Apply Filters</button>
+                    
+                    <div style="flex-grow: 1; text-align: right;">
+                        <button class="btn btn-success" onclick="openLedgerPaymentModal()" id="pl-btn-payment" style="height: 38px;">💰 Add Payment</button>
+                        <button class="btn btn-secondary" onclick="printLedger()" style="height: 38px;">🖨️ Print</button>
+                    </div>
+                </div>
+
+                <div style="overflow-x: auto;">
+                    <table class="data-table" id="pl-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Ref No</th>
+                                <th>Particulars</th>
+                                <th style="text-align: right;">Debit (₹)</th>
+                                <th style="text-align: right;">Credit (₹)</th>
+                                <th style="text-align: right;">Balance (₹)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pl-table-body">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                        <tfoot style="font-weight: bold; background: #f8f9fa;">
+                            <tr>
+                                <td colspan="3" style="text-align: right;">Totals:</td>
+                                <td id="pl-total-debit" style="text-align: right; color: #dc3545;">₹0.00</td>
+                                <td id="pl-total-credit" style="text-align: right; color: #28a745;">₹0.00</td>
+                                <td id="pl-closing-balance" style="text-align: right;">₹0.00</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ledger Payment Modal -->
+    <div id="ledgerPaymentModal" class="modal" style="z-index: 2010;">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2>💰 Record Payment</h2>
+                <button class="modal-close" onclick="closeLedgerPaymentModal()">&times;</button>
+            </div>
+            <div class="form-grid">
+                <input type="hidden" id="lp-party-id">
+                <input type="hidden" id="lp-party-type">
+                
+                <div class="form-group" style="grid-column: 1 / -1; background: #e9ecef; padding: 10px; border-radius: 4px;">
+                    <div style="font-size: 12px; color: #666;">Party Name</div>
+                    <div id="lp-party-name-display" style="font-weight: bold; font-size: 16px;"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Payment Date <span style="color:red;">*</span></label>
+                    <input type="date" id="lp-date" required>
+                </div>
+                <div class="form-group">
+                    <label>Amount (₹) <span style="color:red;">*</span></label>
+                    <input type="number" id="lp-amount" min="0.01" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label>Payment Method</label>
+                    <select id="lp-method">
+                        <option value="cash">Cash</option>
+                        <option value="upi">UPI</option>
+                        <option value="bank">Bank Transfer</option>
+                        <option value="card">Card</option>
+                        <option value="cheque">Cheque</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Reference / Cheque No.</label>
+                    <input type="text" id="lp-reference" placeholder="Optional">
+                </div>
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label>Notes / Particulars</label>
+                    <input type="text" id="lp-notes" placeholder="E.g., Account settled">
+                </div>
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                <button class="btn btn-secondary" onclick="closeLedgerPaymentModal()">Cancel</button>
+                <button class="btn btn-success" onclick="saveLedgerPayment()">💾 Save Payment</button>
             </div>
         </div>
     </div>
@@ -3974,6 +4407,10 @@
                 <div class="form-group" style="grid-column: 1 / -1;">
                     <label>Notes</label>
                     <input type="text" id="newCustomerNotes" placeholder="Additional Notes">
+                </div>
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label>Opening Balance (₹)</label>
+                    <input type="number" id="newCustomerOpeningBalance" placeholder="0.00" step="0.01" min="0">
                 </div>
             </div>
             <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
@@ -4739,6 +5176,10 @@
                 
                 document.getElementById('customerAmount').value = '';
                 document.getElementById('changeAmount').value = '';
+                document.getElementById('creditAmountPaid').value = '0';
+                document.getElementById('creditOutstanding').value = '0';
+                document.getElementById('creditPaymentMethod').value = 'cash';
+                document.getElementById('creditDueDate').value = '';
                 console.log('Cart cleared successfully');
                 showAlert('Cart cleared successfully!', '✅');
             });
@@ -5132,6 +5573,26 @@
         }
 
 
+        function togglePurchasePaymentFields() {
+            const method = document.getElementById('purchasePaymentMethod').value;
+            const group = document.getElementById('purchaseCreditPaymentGroup');
+            if (method === 'credit') {
+                group.style.display = 'block';
+                calculatePurchaseOutstanding();
+            } else {
+                group.style.display = 'none';
+                document.getElementById('purchaseCreditAmountPaid').value = '0';
+                document.getElementById('purchaseCreditOutstanding').value = '0';
+            }
+        }
+
+        function calculatePurchaseOutstanding() {
+            const total = parseFloat(document.getElementById('purchaseTotalValue').textContent) || 0;
+            const paid = parseFloat(document.getElementById('purchaseCreditAmountPaid').value) || 0;
+            const outstanding = total - paid;
+            document.getElementById('purchaseCreditOutstanding').value = outstanding > 0 ? outstanding.toFixed(2) : '0.00';
+        }
+
         function closePurchaseModal() {
             document.getElementById('purchaseModal').style.display = 'none';
         }
@@ -5403,6 +5864,11 @@
             }
             
             updateUIForRole();
+            
+            // Re-calculate outstanding in case it's a credit purchase
+            if (typeof calculatePurchaseOutstanding === 'function') {
+                calculatePurchaseOutstanding();
+            }
         }
 
         // --- Supplier Search Logic (Custom Dropdown) ---
@@ -5580,6 +6046,7 @@
                     <td>${s.phone || '-'}</td>
                     <td>
                         <button class="btn btn-info btn-sm" onclick="viewSupplier('${s.id}')" title="View Details">👁️</button>
+                        <button class="btn btn-secondary btn-sm" onclick="openPartyLedger('${s.id}', 'supplier')" title="View Ledger">📖</button>
                         <button class="btn btn-warning btn-sm" onclick="openAddSupplierModal(null, '${s.id}')" title="Edit">✏️</button>
                         <button class="btn btn-danger btn-sm" onclick="deleteSupplier('${s.id}')" title="Delete">🗑️</button>
                     </td>
@@ -5607,6 +6074,7 @@
             document.getElementById('newSupplierState').value = '';
             document.getElementById('newSupplierCountry').value = 'INDIA';
             document.getElementById('newSupplierNotes').value = '';
+            document.getElementById('newSupplierOpeningBalance').value = '';
 
             if (isEdit) {
                 const supplier = suppliers.find(s => s.id === editId);
@@ -5618,6 +6086,7 @@
                     document.getElementById('newSupplierState').value = supplier.state || '';
                     document.getElementById('newSupplierCountry').value = supplier.country || 'INDIA';
                     document.getElementById('newSupplierNotes').value = supplier.notes || '';
+                    document.getElementById('newSupplierOpeningBalance').value = supplier.openingBalance || '';
                 }
             }
         }
@@ -5653,6 +6122,7 @@
             const state = document.getElementById('newSupplierState').value.trim();
             const country = document.getElementById('newSupplierCountry').value.trim();
             const notes = document.getElementById('newSupplierNotes').value.trim();
+            const openingBalance = parseFloat(document.getElementById('newSupplierOpeningBalance').value) || 0;
 
             if (!name) {
                 showAlert('Supplier Name is required', '⚠️');
@@ -5680,13 +6150,13 @@
             if (editId) {
                 const index = suppliers.findIndex(s => s.id === editId);
                 if (index !== -1) {
-                    suppliers[index] = { ...suppliers[index], name: normalizedName, gstin, phone, address, state, country, notes };
+                    suppliers[index] = { ...suppliers[index], name: normalizedName, gstin, phone, address, state, country, notes, openingBalance };
                 }
             } else {
                 const newSupplier = {
                     id: 'sup_' + Date.now() + Math.random().toString(36).substr(2, 5),
                     name: normalizedName,
-                    gstin, phone, address, state, country, notes
+                    gstin, phone, address, state, country, notes, openingBalance
                 };
                 suppliers.push(newSupplier);
                 
@@ -5781,6 +6251,7 @@
                     <td>${c.phone || '-'}</td>
                     <td>
                         <button class="btn btn-info btn-sm" onclick="viewCustomer('${c.id}')" title="View Details">👁️</button>
+                        <button class="btn btn-secondary btn-sm" onclick="openPartyLedger('${c.id}', 'customer')" title="View Ledger">📖</button>
                         <button class="btn btn-warning btn-sm" onclick="openAddCustomerModal(null, '${c.id}')" title="Edit">✏️</button>
                         <button class="btn btn-danger btn-sm" onclick="deleteCustomer('${c.id}')" title="Delete">🗑️</button>
                     </td>
@@ -5801,6 +6272,7 @@
             document.getElementById('newCustomerState').value = '';
             document.getElementById('newCustomerCountry').value = 'INDIA';
             document.getElementById('newCustomerNotes').value = '';
+            document.getElementById('newCustomerOpeningBalance').value = '';
 
             if (isEdit) {
                 const customer = customers.find(c => c.id === editId);
@@ -5812,6 +6284,7 @@
                     document.getElementById('newCustomerState').value = customer.state || '';
                     document.getElementById('newCustomerCountry').value = customer.country || 'INDIA';
                     document.getElementById('newCustomerNotes').value = customer.notes || '';
+                    document.getElementById('newCustomerOpeningBalance').value = customer.openingBalance || '';
                 }
             }
         }
@@ -5860,6 +6333,7 @@
             const state = document.getElementById('newCustomerState').value.trim();
             const country = document.getElementById('newCustomerCountry').value.trim();
             const notes = document.getElementById('newCustomerNotes').value.trim();
+            const openingBalance = parseFloat(document.getElementById('newCustomerOpeningBalance').value) || 0;
 
             if (!name) {
                 showAlert('Customer Name is required', '⚠️');
@@ -5918,14 +6392,14 @@
             if (editId) {
                 const index = customers.findIndex(c => c.id === editId);
                 if (index !== -1) {
-                    customers[index] = { ...customers[index], name: normalizedName, gstin, phone, address, state, country, notes };
+                    customers[index] = { ...customers[index], name: normalizedName, gstin, phone, address, state, country, notes, openingBalance };
                 }
             } else {
                 newCustomerId = 'cus_' + Date.now() + Math.random().toString(36).substr(2, 5);
                 const newCustomer = {
                     id: newCustomerId,
                     name: normalizedName,
-                    gstin, phone, address, state, country, notes
+                    gstin, phone, address, state, country, notes, openingBalance
                 };
                 customers.push(newCustomer);
             }
@@ -6119,6 +6593,11 @@
                 updatePurchaseTable();
                 document.getElementById('purchaseInvoiceNumber').value = '';
                 document.getElementById('purchaseSupplier').value = '';
+                if(document.getElementById('purchasePaymentMethod')) document.getElementById('purchasePaymentMethod').value = 'cash';
+                if(document.getElementById('purchaseCreditAmountPaid')) document.getElementById('purchaseCreditAmountPaid').value = '0';
+                if(document.getElementById('purchaseCreditOutstanding')) document.getElementById('purchaseCreditOutstanding').value = '0';
+                if(document.getElementById('purchaseCreditDueDate')) document.getElementById('purchaseCreditDueDate').value = '';
+                if(typeof togglePurchasePaymentFields === 'function') togglePurchasePaymentFields();
                 selectedSupplierId = null;
             }
         }
@@ -6173,6 +6652,17 @@
 
             const settings = JSON.parse(localStorage.getItem('settings') || 'null') || getDefaultSettings();
 
+            const paymentMethod = document.getElementById('purchasePaymentMethod') ? document.getElementById('purchasePaymentMethod').value : 'cash';
+            const creditAmountPaid = parseFloat(document.getElementById('purchaseCreditAmountPaid').value) || 0;
+            const creditOutstanding = total - creditAmountPaid;
+            const creditPaymentMethod = document.getElementById('purchaseCreditPaymentMethod') ? document.getElementById('purchaseCreditPaymentMethod').value : 'cash';
+            const creditDueDate = document.getElementById('purchaseCreditDueDate') ? document.getElementById('purchaseCreditDueDate').value : '';
+
+            if (paymentMethod === 'credit' && creditAmountPaid > total) {
+                showAlert(`❌ Amount Paid cannot be greater than Total Amount for a credit purchase!`, '⚠️');
+                return;
+            }
+
             const record = {
                 id: Date.now(),
                 invoiceNumber: invoice,
@@ -6185,7 +6675,26 @@
                 discount: discount,
                 otherCharges: other,
                 totalAmount: total,
-                gstApplied: settings.gstEnabled === true
+                gstApplied: settings.gstEnabled === true,
+                
+                // Credit Payment Tracking
+                paymentStatus: paymentMethod === 'credit' ? (creditOutstanding <= 0 ? 'fully_paid' : (creditAmountPaid > 0 ? 'partially_paid' : 'unpaid')) : 'fully_paid',
+                amountPaid: paymentMethod === 'credit' ? creditAmountPaid : total,
+                outstandingAmount: paymentMethod === 'credit' ? creditOutstanding : 0,
+                dueDate: paymentMethod === 'credit' ? creditDueDate : '',
+                paymentHistory: paymentMethod === 'credit' && creditAmountPaid > 0 ? [{
+                    date: date || new Date().toISOString().split('T')[0],
+                    amount: creditAmountPaid,
+                    method: creditPaymentMethod,
+                    reference: document.getElementById('creditReference') ? document.getElementById('creditReference').value : '',
+                    notes: 'Initial Payment'
+                }] : (paymentMethod !== 'credit' ? [{
+                    date: date || new Date().toISOString().split('T')[0],
+                    amount: total,
+                    method: paymentMethod,
+                    reference: '',
+                    notes: 'Fully Paid'
+                }] : [])
             };
 
             // Show Blocking Overlay
@@ -6208,6 +6717,11 @@
                     document.getElementById('purchaseOtherCharges').value = 0;
                     document.getElementById('purchaseInvoiceNumber').value = '';
                     document.getElementById('purchaseSupplier').value = '';
+                    if(document.getElementById('purchasePaymentMethod')) document.getElementById('purchasePaymentMethod').value = 'cash';
+                    if(document.getElementById('purchaseCreditAmountPaid')) document.getElementById('purchaseCreditAmountPaid').value = '0';
+                    if(document.getElementById('purchaseCreditOutstanding')) document.getElementById('purchaseCreditOutstanding').value = '0';
+                    if(document.getElementById('purchaseCreditDueDate')) document.getElementById('purchaseCreditDueDate').value = '';
+                    if(typeof togglePurchasePaymentFields === 'function') togglePurchasePaymentFields();
                     selectedSupplierId = null;
 
                     // Close Modal
@@ -6234,6 +6748,8 @@
 
         function showPurchaseAddNewProductForm() {
             document.getElementById('purchaseNewProductContainer').style.display = 'block';
+            populateCategoryDropdowns();
+            populateUnitDropdowns();
             document.getElementById('newProductBarcode').value = '';
             document.getElementById('newProductName').value = '';
             document.getElementById('newProductCategory').value = '';
@@ -6817,6 +7333,9 @@
                 const fallbackNav = document.querySelector(`.nav-tab[data-tab="${tabName}"]`);
                 if (fallbackNav) {
                     fallbackNav.classList.add('active');
+                } else if (tabName === 'receivables' || tabName === 'payables') {
+                    const prodNav = document.querySelector(`.nav-tab[data-tab="products"]`);
+                    if (prodNav) prodNav.classList.add('active');
                 }
             }
 
@@ -8482,6 +9001,7 @@
             const customerAmountGroup = document.getElementById('customerAmountGroup');
             const otherPaymentGroup = document.getElementById('otherPaymentGroup');
             const changeAmountGroup = document.getElementById('changeAmountGroup');
+            const creditPaymentGroup = document.getElementById('creditPaymentGroup');
             const cashAmountInput = document.getElementById('customerAmount');
             const cashAmountError = document.getElementById('cashAmountError');
 
@@ -8489,6 +9009,7 @@
                 customerAmountGroup.style.display = 'block';
                 otherPaymentGroup.style.display = 'none';
                 changeAmountGroup.style.display = 'block';
+                if (creditPaymentGroup) creditPaymentGroup.style.display = 'none';
                 document.getElementById('otherPaymentAmount').value = '0';
                 cashAmountInput.required = true;
                 cashAmountInput.value = document.getElementById('cartTotal').value || '0.00';
@@ -8498,14 +9019,27 @@
                 customerAmountGroup.style.display = 'block';
                 otherPaymentGroup.style.display = 'block';
                 changeAmountGroup.style.display = 'block';
+                if (creditPaymentGroup) creditPaymentGroup.style.display = 'none';
                 cashAmountInput.required = true;
                 cashAmountInput.value = document.getElementById('cartTotal').value || '0.00';
+                if (cashAmountError) cashAmountError.style.display = 'none';
+                calculateChange();
+            } else if (paymentMethod === 'credit') {
+                customerAmountGroup.style.display = 'none';
+                otherPaymentGroup.style.display = 'none';
+                changeAmountGroup.style.display = 'none';
+                if (creditPaymentGroup) creditPaymentGroup.style.display = 'block';
+                cashAmountInput.required = false;
+                document.getElementById('customerAmount').value = '';
+                document.getElementById('otherPaymentAmount').value = '0';
+                document.getElementById('changeAmount').value = '';
                 if (cashAmountError) cashAmountError.style.display = 'none';
                 calculateChange();
             } else {
                 customerAmountGroup.style.display = 'none';
                 otherPaymentGroup.style.display = 'none';
                 changeAmountGroup.style.display = 'none';
+                if (creditPaymentGroup) creditPaymentGroup.style.display = 'none';
                 cashAmountInput.required = false;
                 document.getElementById('customerAmount').value = '';
                 document.getElementById('otherPaymentAmount').value = '0';
@@ -8513,6 +9047,8 @@
                 if (cashAmountError) cashAmountError.style.display = 'none';
             }
         }
+
+
 
         function validateCashAmount() {
             const cashAmountInput = document.getElementById('customerAmount');
@@ -8555,6 +9091,33 @@
 
             let change = 0;
             let totalReceived = 0;
+
+            if (paymentMethod === 'credit') {
+                let creditPaid = parseFloat(document.getElementById('creditAmountPaid').value) || 0;
+                
+                if (creditPaid > total) {
+                    creditPaid = total;
+                    document.getElementById('creditAmountPaid').value = creditPaid;
+                }
+                if (creditPaid < 0) {
+                    creditPaid = 0;
+                    document.getElementById('creditAmountPaid').value = 0;
+                }
+
+                const outstanding = total - creditPaid;
+                document.getElementById('creditOutstanding').value = outstanding > 0 ? '₹' + outstanding.toFixed(2) : '₹0.00';
+                
+                const advanceSection = document.getElementById('inlineAdvancePaymentSection');
+                advanceSection.style.display = 'block'; // Always show
+                
+                const method = document.getElementById('creditPaymentMethod').value;
+                const refGroup = document.getElementById('inlineReferenceGroup');
+                if (method === 'upi' || method === 'bank' || method === 'cheque' || method === 'card' || method === 'other') {
+                    refGroup.style.display = 'block';
+                } else {
+                    refGroup.style.display = 'none';
+                }
+            }
 
             if (paymentMethod === 'cash') {
                 totalReceived = customerAmount;
@@ -8737,6 +9300,16 @@
             const subtotal = cart.reduce((sum, item) => sum + (item.finalTotal !== undefined ? item.finalTotal : item.total), 0);
             const total = parseFloat(document.getElementById('cartTotal').value) || 0;
 
+            if (paymentMethod === 'credit' && (!customerId || customerType === 'walk-in' || customerName === 'Walk-in Customer')) {
+                showAlert('❌ Customer details are required for credit sales.\n\nPlease select or add a customer before completing the sale.', '⚠️');
+                const searchCustomerInput = document.getElementById('saleCustomerSearch');
+                if (searchCustomerInput) {
+                    searchCustomerInput.focus();
+                    searchCustomerInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                return;
+            }
+
             // Validate Cash Received field for cash and mixed payments
             if (paymentMethod === 'cash' || paymentMethod === 'mixed') {
                 const cashAmountInput = document.getElementById('customerAmount');
@@ -8761,6 +9334,10 @@
 
             const customerAmount = parseFloat(document.getElementById('customerAmount').value) || 0;
             const otherPaymentAmount = parseFloat(document.getElementById('otherPaymentAmount').value) || 0;
+            const creditAmountPaid = parseFloat(document.getElementById('creditAmountPaid').value) || 0;
+            const creditOutstanding = total - creditAmountPaid;
+            const creditPaymentMethod = document.getElementById('creditPaymentMethod') ? document.getElementById('creditPaymentMethod').value : 'cash';
+            const creditDueDate = document.getElementById('creditDueDate') ? document.getElementById('creditDueDate').value : '';
 
             // Calculate total received
             let totalReceived = 0;
@@ -8768,12 +9345,24 @@
                 totalReceived = customerAmount;
             } else if (paymentMethod === 'mixed') {
                 totalReceived = customerAmount + otherPaymentAmount;
+            } else if (paymentMethod === 'credit') {
+                totalReceived = creditAmountPaid;
             } else {
-                totalReceived = total; // Card/UPI/Credit - assume full payment
+                totalReceived = total; // Card/UPI - assume full payment
             }
 
-            // Prevent sale if amount is short (negative)
-            if (totalReceived < total) {
+            if (paymentMethod === 'credit' && totalReceived > total) {
+                showAlert(`❌ Amount Paid cannot be greater than Total Amount for a credit sale!`, '⚠️');
+                return;
+            }
+            
+            if (paymentMethod === 'credit' && totalReceived > 0 && (!creditPaymentMethod || creditPaymentMethod === '')) {
+                showAlert('❌ Please select an advance payment method.', '⚠️');
+                return;
+            }
+
+            // Prevent sale if amount is short (negative) (skip for credit as it implies a short payment)
+            if (paymentMethod !== 'credit' && totalReceived < total) {
                 const shortBy = total - totalReceived;
                 negativeChangeCount++;
                 localStorage.setItem('negativeChangeCount', negativeChangeCount.toString());
@@ -8880,7 +9469,20 @@
                             change: change,
                             // Store base unit quantity for stock deduction logic
                             baseQuantity: item.baseQuantity || 1,
-                            gstApplied: settings.gstEnabled === true
+                            gstApplied: settings.gstEnabled === true,
+                            
+                            // Credit Payment Tracking
+                            paymentStatus: paymentMethod === 'credit' ? (creditOutstanding <= 0 ? 'fully_paid' : (creditAmountPaid > 0 ? 'partially_paid' : 'unpaid')) : 'fully_paid',
+                            amountPaid: paymentMethod === 'credit' ? creditAmountPaid : totalReceived,
+                            outstandingAmount: paymentMethod === 'credit' ? creditOutstanding : 0,
+                            dueDate: paymentMethod === 'credit' ? creditDueDate : '',
+                            paymentHistory: paymentMethod === 'credit' && creditAmountPaid > 0 ? [{
+                                date: saleDate,
+                                amount: creditAmountPaid,
+                                method: creditPaymentMethod,
+                                reference: document.getElementById('creditReference') ? document.getElementById('creditReference').value : '',
+                                notes: 'Initial Payment'
+                            }] : []
                         };
 
                         // sales.push(sale); // DO NOT PUSH LOCALLY YET
@@ -8938,6 +9540,10 @@
                         
                         document.getElementById('customerAmount').value = '';
                         document.getElementById('changeAmount').value = '';
+                        document.getElementById('creditAmountPaid').value = '0';
+                        document.getElementById('creditOutstanding').value = '0';
+                        document.getElementById('creditPaymentMethod').value = 'cash';
+                        document.getElementById('creditDueDate').value = '';
 
                         // Show receipt
                         showReceipt();
@@ -11742,6 +12348,10 @@
                 editImgPreview.style.display = 'none';
                 editImgClear.style.display = 'none';
             }
+
+            // Refresh dropdowns from master data
+            populateCategoryDropdowns();
+            populateUnitDropdowns();
 
             // Handle category - add to dropdown if it's a custom category not in the list
             const categorySelect = document.getElementById('editProductCategory');
@@ -15906,16 +16516,8 @@
                     select.appendChild(option);
                 });
                 
-                // Add the "Create New" option
-                const createOption = document.createElement('option');
-                createOption.value = 'CREATE_NEW';
-                createOption.textContent = '➕ Create New Category...';
-                createOption.style.fontWeight = 'bold';
-                createOption.style.color = '#007bff';
-                select.appendChild(createOption);
-                
-                // Restore selection if it still exists (and isn't CREATE_NEW)
-                if (currentValue && currentValue !== 'CREATE_NEW' && Array.from(select.options).some(o => o.value === currentValue)) {
+                // Restore selection
+                if (currentValue && Array.from(select.options).some(o => o.value === currentValue)) {
                     select.value = currentValue;
                 }
             });
@@ -15937,16 +16539,8 @@
                     select.appendChild(option);
                 });
                 
-                // Add the "Create New" option
-                const createOption = document.createElement('option');
-                createOption.value = 'CREATE_NEW';
-                createOption.textContent = '➕ Create New Unit...';
-                createOption.style.fontWeight = 'bold';
-                createOption.style.color = '#007bff';
-                select.appendChild(createOption);
-                
                 // Restore selection
-                if (currentValue && currentValue !== 'CREATE_NEW' && Array.from(select.options).some(o => o.value === currentValue)) {
+                if (currentValue && Array.from(select.options).some(o => o.value === currentValue)) {
                     select.value = currentValue;
                 }
             });
@@ -15977,8 +16571,10 @@
 
                 newSubmitBtn.addEventListener('click', () => {
                     const value = inputEl.value;
-                    closeCustomPromptModal();
-                    if (customPromptResolve) customPromptResolve(value);
+                    const resolver = customPromptResolve;
+                    customPromptResolve = null; // Prevent closeModal from resolving with null
+                    document.getElementById('customPromptModal').classList.remove('active');
+                    if (resolver) resolver(value);
                 });
 
                 inputEl.onkeyup = function(event) {
@@ -16801,6 +17397,523 @@
             window.URL.revokeObjectURL(url);
         }
 
+        // --- Receivables & Payables Logic ---
+        function renderReceivablesTable() {
+            const tbody = document.getElementById('receivablesTableBody');
+            if (!tbody) return;
+            const search = (document.getElementById('receivablesSearch').value || '').toLowerCase();
+            const statusFilter = document.getElementById('receivablesStatusFilter').value;
+
+            // Group sales by receiptNumber to get total bill amounts for credit sales
+            const creditBills = {};
+            sales.forEach(sale => {
+                if (sale.paymentMethod === 'credit') {
+                    if (!creditBills[sale.receiptNumber]) {
+                        creditBills[sale.receiptNumber] = {
+                            date: sale.date,
+                            invoice: sale.receiptNumber,
+                            customer: sale.customerName || 'Unknown',
+                            customerId: sale.customerId || '',
+                            totalAmount: 0,
+                            amountPaid: sale.amountPaid || 0,
+                            outstandingAmount: sale.outstandingAmount || 0,
+                            dueDate: sale.dueDate || '',
+                            paymentStatus: sale.paymentStatus || 'unpaid',
+                            rawSale: sale
+                        };
+                    }
+                    creditBills[sale.receiptNumber].totalAmount = sale.totalAmount || sale.subtotal + sale.totalTax; // approximate total if not explicitly set
+                    // Recompute total accurately based on price*qty
+                    // actually total is sale.total for the item, so sum it up:
+                    if(sale.total) {
+                        creditBills[sale.receiptNumber].totalAmount = 0; // reset and sum
+                    }
+                }
+            });
+            
+            // Second pass for accurate total
+            sales.forEach(sale => {
+                if (sale.paymentMethod === 'credit' && creditBills[sale.receiptNumber]) {
+                    creditBills[sale.receiptNumber].totalAmount += sale.total;
+                    // Keep the latest payment tracking fields
+                    creditBills[sale.receiptNumber].amountPaid = sale.amountPaid;
+                    creditBills[sale.receiptNumber].outstandingAmount = sale.outstandingAmount;
+                    creditBills[sale.receiptNumber].paymentStatus = sale.paymentStatus;
+                }
+            });
+
+            let filtered = Object.values(creditBills).filter(bill => {
+                const matchSearch = bill.customer.toLowerCase().includes(search) || bill.invoice.toLowerCase().includes(search);
+                let matchStatus = true;
+                if (statusFilter === 'unpaid') {
+                    matchStatus = bill.paymentStatus !== 'fully_paid';
+                } else if (statusFilter === 'fully_paid') {
+                    matchStatus = bill.paymentStatus === 'fully_paid';
+                }
+                return matchSearch && matchStatus;
+            });
+
+            filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="9" class="text-center">No receivables found.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(bill => {
+                const d = new Date(bill.date).toLocaleDateString();
+                const statusBadge = bill.paymentStatus === 'fully_paid' ? 
+                    '<span class="badge" style="background: #28a745; color: white; padding: 4px 8px; border-radius: 4px;">Paid</span>' : 
+                    (bill.paymentStatus === 'partially_paid' ? '<span class="badge" style="background: #ffc107; color: black; padding: 4px 8px; border-radius: 4px;">Partial</span>' : 
+                    '<span class="badge" style="background: #dc3545; color: white; padding: 4px 8px; border-radius: 4px;">Unpaid</span>');
+
+                return `
+                    <tr>
+                        <td>${d}</td>
+                        <td>${bill.invoice}</td>
+                        <td>${bill.customer}</td>
+                        <td>₹${bill.totalAmount.toFixed(2)}</td>
+                        <td>₹${bill.amountPaid.toFixed(2)}</td>
+                        <td style="color: #c53030; font-weight: bold;">₹${bill.outstandingAmount.toFixed(2)}</td>
+                        <td>${bill.dueDate || '-'}</td>
+                        <td>${statusBadge}</td>
+                        <td>
+                            <button class="btn btn-sm btn-primary" onclick="openPaymentModal('sale', '${bill.invoice}')" ${bill.paymentStatus === 'fully_paid' ? 'disabled' : ''}>Pay / View</button>
+                            ${bill.customerId ? `<button class="btn btn-sm btn-secondary" onclick="openPartyLedger('${bill.customerId}', 'customer')">📖 Ledger</button>` : ''}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderPayablesTable() {
+            const tbody = document.getElementById('payablesTableBody');
+            if (!tbody) return;
+            const search = (document.getElementById('payablesSearch').value || '').toLowerCase();
+            const statusFilter = document.getElementById('payablesStatusFilter').value;
+
+            let filtered = purchases.filter(p => {
+                const hasCredit = p.paymentStatus && p.paymentStatus !== 'fully_paid' || (p.paymentHistory && p.paymentHistory.some(h => h.method === 'credit'));
+                const isCredit = (p.outstandingAmount !== undefined && p.paymentStatus) || hasCredit;
+                if (!isCredit && p.totalAmount === p.amountPaid) return false; // Filter out legacy cash purchases
+                
+                const matchSearch = (p.supplier || '').toLowerCase().includes(search) || (p.invoiceNumber || '').toLowerCase().includes(search);
+                let matchStatus = true;
+                if (statusFilter === 'unpaid') {
+                    matchStatus = p.paymentStatus !== 'fully_paid';
+                } else if (statusFilter === 'fully_paid') {
+                    matchStatus = p.paymentStatus === 'fully_paid';
+                }
+                
+                // Fallback for older credit purchases without paymentStatus
+                if(p.paymentStatus === undefined && p.paymentHistory) {
+                    if (statusFilter === 'unpaid') matchStatus = true;
+                }
+
+                return matchSearch && matchStatus && p.paymentStatus;
+            });
+
+            filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="9" class="text-center">No payables found.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(bill => {
+                const d = new Date(bill.date).toLocaleDateString();
+                const statusBadge = bill.paymentStatus === 'fully_paid' ? 
+                    '<span class="badge" style="background: #28a745; color: white; padding: 4px 8px; border-radius: 4px;">Paid</span>' : 
+                    (bill.paymentStatus === 'partially_paid' ? '<span class="badge" style="background: #ffc107; color: black; padding: 4px 8px; border-radius: 4px;">Partial</span>' : 
+                    '<span class="badge" style="background: #dc3545; color: white; padding: 4px 8px; border-radius: 4px;">Unpaid</span>');
+
+                return `
+                    <tr>
+                        <td>${d}</td>
+                        <td>${bill.invoiceNumber}</td>
+                        <td>${bill.supplier}</td>
+                        <td>₹${(bill.totalAmount || 0).toFixed(2)}</td>
+                        <td>₹${(bill.amountPaid || 0).toFixed(2)}</td>
+                        <td style="color: #c53030; font-weight: bold;">₹${(bill.outstandingAmount || 0).toFixed(2)}</td>
+                        <td>${bill.dueDate || '-'}</td>
+                        <td>${statusBadge}</td>
+                        <td>
+                            <button class="btn btn-sm btn-primary" onclick="openPaymentModal('purchase', '${bill.invoiceNumber}')" ${bill.paymentStatus === 'fully_paid' ? 'disabled' : ''}>Pay / View</button>
+                            <button class="btn btn-sm btn-secondary" onclick="openPartyLedgerByName('${bill.supplier}', 'supplier')">📖 Ledger</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function openPaymentModal(type, invoice) {
+            document.getElementById('pm-ctx-type').value = type;
+            document.getElementById('pm-ctx-invoice').value = invoice;
+            
+            // Clear previous form data
+            document.getElementById('pm-new-amount').value = '';
+            document.getElementById('pm-new-date').value = new Date().toISOString().split('T')[0];
+            document.getElementById('pm-new-method').value = 'cash';
+            document.getElementById('pm-new-ref').value = '';
+            document.getElementById('pm-new-notes').value = '';
+
+            let recordObj = null;
+            let entityName = '';
+            let date = '';
+            let total = 0;
+            let paid = 0;
+            let outstanding = 0;
+            let status = 'unpaid';
+            let history = [];
+
+            if (type === 'sale') {
+                document.getElementById('pm-entity-label').textContent = 'Customer';
+                // Find all sale items for this invoice
+                const saleItems = sales.filter(s => s.receiptNumber === invoice);
+                if (saleItems.length === 0) return;
+                
+                // Aggregate logic similar to renderReceivablesTable
+                const firstItem = saleItems[0];
+                entityName = firstItem.customerName || 'Unknown';
+                date = new Date(firstItem.date).toLocaleDateString();
+                
+                total = saleItems.reduce((sum, s) => sum + (s.total || (s.subtotal + s.totalTax)), 0);
+                
+                // For paid/outstanding/history we just take the last updated state from any item
+                // (Since they are updated identically across the invoice bundle)
+                paid = firstItem.amountPaid || 0;
+                outstanding = firstItem.outstandingAmount !== undefined ? firstItem.outstandingAmount : (total - paid);
+                status = firstItem.paymentStatus || 'unpaid';
+                history = firstItem.paymentHistory || [];
+            } else if (type === 'purchase') {
+                document.getElementById('pm-entity-label').textContent = 'Supplier';
+                const p = purchases.find(p => p.invoiceNumber === invoice);
+                if (!p) return;
+                
+                entityName = p.supplier || 'Unknown';
+                date = new Date(p.date).toLocaleDateString();
+                total = p.totalAmount || 0;
+                paid = p.amountPaid || 0;
+                outstanding = p.outstandingAmount !== undefined ? p.outstandingAmount : (total - paid);
+                status = p.paymentStatus || 'unpaid';
+                history = p.paymentHistory || [];
+            }
+
+            document.getElementById('pm-invoice').textContent = invoice;
+            document.getElementById('pm-date').textContent = date;
+            document.getElementById('pm-entity-name').textContent = entityName;
+            document.getElementById('pm-total').textContent = '₹' + total.toFixed(2);
+            document.getElementById('pm-paid').textContent = '₹' + paid.toFixed(2);
+            document.getElementById('pm-outstanding').textContent = '₹' + outstanding.toFixed(2);
+            
+            // Handle floating point precision issues for outstanding
+            if (outstanding < 0.01) outstanding = 0;
+
+            const badge = document.getElementById('pm-status-badge');
+            if (status === 'fully_paid' || outstanding <= 0) {
+                badge.textContent = 'Paid';
+                badge.style.background = '#28a745';
+                badge.style.color = 'white';
+                document.getElementById('pm-submit-btn').disabled = true;
+            } else if (status === 'partially_paid' || paid > 0) {
+                badge.textContent = 'Partial';
+                badge.style.background = '#ffc107';
+                badge.style.color = 'black';
+                document.getElementById('pm-submit-btn').disabled = false;
+            } else {
+                badge.textContent = 'Unpaid';
+                badge.style.background = '#dc3545';
+                badge.style.color = 'white';
+                document.getElementById('pm-submit-btn').disabled = false;
+            }
+
+            renderPaymentHistory(history);
+
+            document.getElementById('paymentModal').style.display = 'flex';
+        }
+
+        function closePaymentModal() {
+            document.getElementById('paymentModal').style.display = 'none';
+        }
+
+        function renderPaymentHistory(history) {
+            const tbody = document.getElementById('pm-history-body');
+            if (!history || history.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center">No payments recorded.</td></tr>';
+                return;
+            }
+
+            // Sort newest first
+            const sorted = [...history].sort((a,b) => new Date(b.date) - new Date(a.date));
+
+            tbody.innerHTML = sorted.map((h, i) => `
+                <tr>
+                    <td>${new Date(h.date).toLocaleDateString()}</td>
+                    <td style="font-weight: bold; color: #28a745;">₹${parseFloat(h.amount).toFixed(2)}</td>
+                    <td style="text-transform: capitalize;">${h.method}</td>
+                    <td>${h.reference || '-'}</td>
+                    <td>${h.notes || '-'}</td>
+                    <td><button class="btn btn-sm btn-danger" onclick="deletePayment(${i})">Delete</button></td>
+                </tr>
+            `).join('');
+        }
+
+        function submitPayment() {
+            const type = document.getElementById('pm-ctx-type').value;
+            const invoice = document.getElementById('pm-ctx-invoice').value;
+            
+            const amountStr = document.getElementById('pm-new-amount').value;
+            const amount = parseFloat(amountStr);
+            const date = document.getElementById('pm-new-date').value;
+            const method = document.getElementById('pm-new-method').value;
+            const reference = document.getElementById('pm-new-ref').value;
+            const notes = document.getElementById('pm-new-notes').value;
+
+            if (!amountStr || isNaN(amount) || amount <= 0) {
+                showAlert('Please enter a valid payment amount greater than ₹0.', '⚠️');
+                return;
+            }
+            if (!date) {
+                showAlert('Payment Date is required.', '⚠️');
+                return;
+            }
+
+            // Get current outstanding
+            let total = 0;
+            let currentPaid = 0;
+            let history = [];
+            
+            if (type === 'sale') {
+                const saleItems = sales.filter(s => s.receiptNumber === invoice);
+                total = saleItems.reduce((sum, s) => sum + (s.total || (s.subtotal + s.totalTax)), 0);
+                currentPaid = saleItems[0].amountPaid || 0;
+                history = saleItems[0].paymentHistory || [];
+            } else {
+                const p = purchases.find(p => p.invoiceNumber === invoice);
+                total = p.totalAmount || 0;
+                currentPaid = p.amountPaid || 0;
+                history = p.paymentHistory || [];
+            }
+
+            let currentOutstanding = total - currentPaid;
+            // Float fix
+            if (currentOutstanding < 0.01) currentOutstanding = 0;
+
+            if (amount > (currentOutstanding + 0.01)) { // 0.01 margin for float errors
+                showAlert(`Payment amount (₹${amount}) cannot exceed the outstanding amount (₹${currentOutstanding.toFixed(2)}).`, '⚠️');
+                return;
+            }
+
+            // Create new payment record
+            const newPayment = {
+                date: date,
+                amount: amount,
+                method: method,
+                reference: reference,
+                notes: notes,
+                id: Date.now()
+            };
+
+            const newHistory = [...history, newPayment];
+            const newPaid = currentPaid + amount;
+            const newOutstanding = total - newPaid;
+            
+            let newStatus = 'unpaid';
+            if (newOutstanding <= 0.01) {
+                newStatus = 'fully_paid';
+            } else if (newPaid > 0) {
+                newStatus = 'partially_paid';
+            }
+
+            // Update Database
+            if (type === 'sale') {
+                let savedSales = JSON.parse(localStorage.getItem('sales')) || [];
+                
+                // Update in memory and localstorage
+                sales.forEach(s => {
+                    if (s.receiptNumber === invoice) {
+                        s.amountPaid = newPaid;
+                        s.outstandingAmount = newOutstanding;
+                        s.paymentStatus = newStatus;
+                        s.paymentHistory = newHistory;
+                    }
+                });
+                savedSales.forEach(s => {
+                    if (s.receiptNumber === invoice) {
+                        s.amountPaid = newPaid;
+                        s.outstandingAmount = newOutstanding;
+                        s.paymentStatus = newStatus;
+                        s.paymentHistory = newHistory;
+                    }
+                });
+                localStorage.setItem('sales', JSON.stringify(savedSales));
+                renderReceivablesTable();
+            } else {
+                let savedPurchases = JSON.parse(localStorage.getItem('purchases')) || [];
+                purchases.forEach(p => {
+                    if (p.invoiceNumber === invoice) {
+                        p.amountPaid = newPaid;
+                        p.outstandingAmount = newOutstanding;
+                        p.paymentStatus = newStatus;
+                        p.paymentHistory = newHistory;
+                    }
+                });
+                savedPurchases.forEach(p => {
+                    if (p.invoiceNumber === invoice) {
+                        p.amountPaid = newPaid;
+                        p.outstandingAmount = newOutstanding;
+                        p.paymentStatus = newStatus;
+                        p.paymentHistory = newHistory;
+                    }
+                });
+                localStorage.setItem('purchases', JSON.stringify(savedPurchases));
+                renderPayablesTable();
+            }
+
+            // If cash, update petty cash / day closing
+            if (method === 'cash') {
+                const pcDesc = type === 'sale' ? `Sale Collection - ${invoice}` : `Purchase Payment - ${invoice}`;
+                const pcType = type === 'sale' ? 'income' : 'expense';
+                const pcCat = type === 'sale' ? 'Customer Payment' : 'Purchase';
+                
+                try {
+                    let pcTransactions = JSON.parse(localStorage.getItem('pettyCashTransactions') || '[]');
+                    let transaction = {
+                        id: Date.now().toString(),
+                        date: date,
+                        type: pcType,
+                        amount: amount,
+                        description: pcDesc,
+                        remarks: notes,
+                        timestamp: Date.now(),
+                        account: 'cash',
+                        category: pcCat,
+                        voucherNo: 'V-' + Math.floor(Math.random() * 1000000) // simplified
+                    };
+                    pcTransactions.push(transaction);
+                    localStorage.setItem('pettyCashTransactions', JSON.stringify(pcTransactions));
+                    if (typeof calculatePCBalances === 'function') {
+                        calculatePCBalances();
+                        renderPCLedger();
+                    }
+                } catch(e) { console.error("Petty cash integration error", e); }
+            }
+
+            showAlert('Payment recorded successfully!', '✅');
+            openPaymentModal(type, invoice); // Refresh modal
+        }
+
+        function deletePayment(index) {
+            if (!confirm('Are you sure you want to delete this payment? This will increase the outstanding amount.')) return;
+            
+            const type = document.getElementById('pm-ctx-type').value;
+            const invoice = document.getElementById('pm-ctx-invoice').value;
+            
+            let total = 0;
+            let currentPaid = 0;
+            let history = [];
+            
+            if (type === 'sale') {
+                const saleItems = sales.filter(s => s.receiptNumber === invoice);
+                total = saleItems.reduce((sum, s) => sum + (s.total || (s.subtotal + s.totalTax)), 0);
+                history = [...(saleItems[0].paymentHistory || [])];
+            } else {
+                const p = purchases.find(p => p.invoiceNumber === invoice);
+                total = p.totalAmount || 0;
+                history = [...(p.paymentHistory || [])];
+            }
+
+            // Sort history to match UI so we delete the right one
+            history.sort((a,b) => new Date(b.date) - new Date(a.date));
+            const deletedPayment = history.splice(index, 1)[0];
+            
+            // Recalculate
+            currentPaid = history.reduce((sum, h) => sum + parseFloat(h.amount), 0);
+            const newOutstanding = total - currentPaid;
+            
+            let newStatus = 'unpaid';
+            if (newOutstanding <= 0.01) {
+                newStatus = 'fully_paid';
+            } else if (currentPaid > 0) {
+                newStatus = 'partially_paid';
+            }
+
+            // Update Database
+            if (type === 'sale') {
+                let savedSales = JSON.parse(localStorage.getItem('sales')) || [];
+                sales.forEach(s => {
+                    if (s.receiptNumber === invoice) {
+                        s.amountPaid = currentPaid;
+                        s.outstandingAmount = newOutstanding;
+                        s.paymentStatus = newStatus;
+                        s.paymentHistory = history;
+                    }
+                });
+                savedSales.forEach(s => {
+                    if (s.receiptNumber === invoice) {
+                        s.amountPaid = currentPaid;
+                        s.outstandingAmount = newOutstanding;
+                        s.paymentStatus = newStatus;
+                        s.paymentHistory = history;
+                    }
+                });
+                localStorage.setItem('sales', JSON.stringify(savedSales));
+                renderReceivablesTable();
+            } else {
+                let savedPurchases = JSON.parse(localStorage.getItem('purchases')) || [];
+                purchases.forEach(p => {
+                    if (p.invoiceNumber === invoice) {
+                        p.amountPaid = currentPaid;
+                        p.outstandingAmount = newOutstanding;
+                        p.paymentStatus = newStatus;
+                        p.paymentHistory = history;
+                    }
+                });
+                savedPurchases.forEach(p => {
+                    if (p.invoiceNumber === invoice) {
+                        p.amountPaid = currentPaid;
+                        p.outstandingAmount = newOutstanding;
+                        p.paymentStatus = newStatus;
+                        p.paymentHistory = history;
+                    }
+                });
+                localStorage.setItem('purchases', JSON.stringify(savedPurchases));
+                renderPayablesTable();
+            }
+
+            // If cash, update petty cash / day closing (revert)
+            if (deletedPayment.method === 'cash') {
+                const pcDesc = type === 'sale' ? `Revert Sale Collection - ${invoice}` : `Revert Purchase Payment - ${invoice}`;
+                const pcType = type === 'sale' ? 'expense' : 'income'; // inverted for reverting
+                const pcCat = type === 'sale' ? 'Customer Refund' : 'Refund Received';
+                
+                try {
+                    let pcTransactions = JSON.parse(localStorage.getItem('pettyCashTransactions') || '[]');
+                    let transaction = {
+                        id: Date.now().toString(),
+                        date: new Date().toISOString().split('T')[0],
+                        type: pcType,
+                        amount: parseFloat(deletedPayment.amount),
+                        description: pcDesc,
+                        remarks: 'Reverted',
+                        timestamp: Date.now(),
+                        account: 'cash',
+                        category: pcCat,
+                        voucherNo: 'V-' + Math.floor(Math.random() * 1000000) // simplified
+                    };
+                    pcTransactions.push(transaction);
+                    localStorage.setItem('pettyCashTransactions', JSON.stringify(pcTransactions));
+                    if (typeof calculatePCBalances === 'function') {
+                        calculatePCBalances();
+                        renderPCLedger();
+                    }
+                } catch(e) { console.error("Petty cash integration error", e); }
+            }
+
+            showAlert('Payment deleted.', '🗑️');
+            openPaymentModal(type, invoice); // Refresh modal
+        }
+
         document.addEventListener('click', function(e) {
             if (!e.target.closest('#globalReportCustomerSearch') && !e.target.closest('#globalReportCustomerResults')) {
                 const el = document.getElementById('globalReportCustomerResults');
@@ -16815,8 +17928,369 @@
                 _origSwitchTab(tabId, btn);
                 if(tabId === 'reports') {
                     generateOnScreenReports();
+                } else if (tabId === 'receivables') {
+                    renderReceivablesTable();
+                } else if (tabId === 'payables') {
+                    renderPayablesTable();
                 }
             };
+        }
+
+        // --- Ledger Logic Implementation ---
+        let currentLedgerParty = null;
+        let currentLedgerType = null;
+        let currentLedgerTransactions = [];
+
+        function openPartyLedgerByName(name, type) {
+            let party = null;
+            if (type === 'customer') {
+                party = customers.find(c => c.name === name);
+            } else {
+                party = suppliers.find(s => s.name === name);
+            }
+            if (party) {
+                openPartyLedger(party.id, type);
+            } else {
+                showAlert(`Cannot find exact record for ${name}`, '⚠️');
+            }
+        }
+
+        function openPartyLedger(partyId, type) {
+            currentLedgerParty = null;
+            currentLedgerType = type;
+            
+            if (type === 'customer') {
+                currentLedgerParty = customers.find(c => c.id === partyId);
+            } else {
+                currentLedgerParty = suppliers.find(s => s.id === partyId);
+            }
+
+            if (!currentLedgerParty) return;
+
+            document.getElementById('pl-title').innerText = currentLedgerParty.name + " Ledger";
+            document.getElementById('pl-party-name').innerText = currentLedgerParty.name || 'Unknown';
+            document.getElementById('pl-party-phone').innerText = currentLedgerParty.phone || 'No Phone';
+            document.getElementById('pl-party-gstin').innerText = currentLedgerParty.gstin || 'No GSTIN';
+            
+            const address = [];
+            if (currentLedgerParty.address) address.push(currentLedgerParty.address);
+            if (currentLedgerParty.state) address.push(currentLedgerParty.state);
+            if (currentLedgerParty.country) address.push(currentLedgerParty.country);
+            document.getElementById('pl-party-address').innerText = address.join(', ');
+
+            // Set default filter to "All Time"
+            document.getElementById('pl-filter-range').value = 'all';
+            document.getElementById('pl-filter-from').value = '';
+            document.getElementById('pl-filter-to').value = '';
+
+            generatePartyLedgerData();
+            document.getElementById('partyLedgerModal').style.display = 'flex';
+        }
+
+        function closePartyLedgerModal() {
+            document.getElementById('partyLedgerModal').style.display = 'none';
+        }
+
+        function generatePartyLedgerData() {
+            currentLedgerTransactions = [];
+            
+            // 1. Add Opening Balance
+            const openingBal = parseFloat(currentLedgerParty.openingBalance) || 0;
+            if (openingBal > 0) {
+                currentLedgerTransactions.push({
+                    date: '1970-01-01T00:00:00.000Z', // Far past to always be first
+                    ref: 'OPENING',
+                    particulars: 'Opening Balance',
+                    debit: currentLedgerType === 'customer' ? openingBal : 0,
+                    credit: currentLedgerType === 'supplier' ? openingBal : 0,
+                    isOpening: true
+                });
+            }
+
+            // 2. Fetch Sales/Purchases
+            if (currentLedgerType === 'customer') {
+                // Group sales by receiptNumber
+                const billMap = {};
+                sales.forEach(s => {
+                    if (s.customerId === currentLedgerParty.id || s.customerName === currentLedgerParty.name) {
+                        if (!billMap[s.receiptNumber]) {
+                            billMap[s.receiptNumber] = {
+                                date: s.date,
+                                ref: s.receiptNumber,
+                                particulars: 'Sale Invoice',
+                                total: 0,
+                                paymentHistory: s.paymentHistory || []
+                            };
+                        }
+                        billMap[s.receiptNumber].total += s.total || (s.subtotal + s.totalTax) || 0;
+                    }
+                });
+
+                Object.values(billMap).forEach(bill => {
+                    currentLedgerTransactions.push({
+                        date: bill.date,
+                        ref: bill.ref,
+                        particulars: bill.particulars,
+                        debit: bill.total,
+                        credit: 0
+                    });
+
+                    // Add payments for this bill
+                    bill.paymentHistory.forEach(ph => {
+                        currentLedgerTransactions.push({
+                            date: ph.date,
+                            ref: ph.reference || `PAY-${bill.ref}`,
+                            particulars: `Payment Received (${ph.method}) - ${ph.notes || ''}`,
+                            debit: 0,
+                            credit: parseFloat(ph.amount)
+                        });
+                    });
+                });
+            } else {
+                // Suppliers
+                purchases.forEach(p => {
+                    if (p.supplier === currentLedgerParty.name) {
+                        currentLedgerTransactions.push({
+                            date: p.date,
+                            ref: p.invoiceNumber || p.id,
+                            particulars: 'Purchase Bill',
+                            debit: 0,
+                            credit: parseFloat(p.totalAmount) || 0
+                        });
+
+                        const hist = p.paymentHistory || [];
+                        hist.forEach(ph => {
+                            currentLedgerTransactions.push({
+                                date: ph.date,
+                                ref: ph.reference || `PAY-${p.invoiceNumber || p.id}`,
+                                particulars: `Payment Made (${ph.method}) - ${ph.notes || ''}`,
+                                debit: parseFloat(ph.amount),
+                                credit: 0
+                            });
+                        });
+                    }
+                });
+            }
+
+            // 3. Fetch General Account Payments
+            const partyPayments = JSON.parse(localStorage.getItem('partyPayments')) || [];
+            partyPayments.forEach(pay => {
+                if (pay.partyId === currentLedgerParty.id) {
+                    currentLedgerTransactions.push({
+                        date: pay.date,
+                        ref: pay.reference || `ACC-PAY-${pay.id.substring(pay.id.length-4)}`,
+                        particulars: `Account Payment (${pay.method}) - ${pay.notes || ''}`,
+                        debit: currentLedgerType === 'supplier' ? parseFloat(pay.amount) : 0,
+                        credit: currentLedgerType === 'customer' ? parseFloat(pay.amount) : 0
+                    });
+                }
+            });
+
+            // 4. Sort chronologically
+            currentLedgerTransactions.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            renderCurrentLedger();
+        }
+
+        function applyLedgerQuickRange() {
+            const range = document.getElementById('pl-filter-range').value;
+            const fromEl = document.getElementById('pl-filter-from');
+            const toEl = document.getElementById('pl-filter-to');
+            
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            
+            if (range === 'all') {
+                fromEl.value = '';
+                toEl.value = '';
+            } else if (range === 'today') {
+                fromEl.value = today.toISOString().split('T')[0];
+                toEl.value = today.toISOString().split('T')[0];
+            } else if (range === 'week') {
+                const startOfWeek = new Date(today);
+                startOfWeek.setDate(today.getDate() - today.getDay());
+                fromEl.value = startOfWeek.toISOString().split('T')[0];
+                toEl.value = today.toISOString().split('T')[0];
+            } else if (range === 'month') {
+                const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+                fromEl.value = startOfMonth.toISOString().split('T')[0];
+                toEl.value = today.toISOString().split('T')[0];
+            } else if (range === 'year') {
+                const startOfYear = new Date(today.getFullYear(), 0, 1);
+                fromEl.value = startOfYear.toISOString().split('T')[0];
+                toEl.value = today.toISOString().split('T')[0];
+            }
+            renderCurrentLedger();
+        }
+
+        function renderCurrentLedger() {
+            const tbody = document.getElementById('pl-table-body');
+            const fromStr = document.getElementById('pl-filter-from').value;
+            const toStr = document.getElementById('pl-filter-to').value;
+            
+            let fromDate = fromStr ? new Date(fromStr) : null;
+            if (fromDate) fromDate.setHours(0,0,0,0);
+            
+            let toDate = toStr ? new Date(toStr) : null;
+            if (toDate) toDate.setHours(23,59,59,999);
+
+            let html = '';
+            let runningBalance = 0;
+            let totalDebit = 0;
+            let totalCredit = 0;
+            
+            let filteredStartBalance = 0;
+            let hasCarriedForward = false;
+
+            currentLedgerTransactions.forEach(tx => {
+                const txDate = new Date(tx.date);
+                
+                // Calculate balance chronologically
+                if (currentLedgerType === 'customer') {
+                    runningBalance += (tx.debit - tx.credit);
+                } else {
+                    runningBalance += (tx.credit - tx.debit);
+                }
+
+                // Filtering Check
+                let inRange = true;
+                if (!tx.isOpening) {
+                    if (fromDate && txDate < fromDate) inRange = false;
+                    if (toDate && txDate > toDate) inRange = false;
+                }
+
+                if (!inRange) {
+                    filteredStartBalance = runningBalance;
+                    hasCarriedForward = true;
+                    return; // Skip rendering
+                }
+
+                // If this is the first rendered row and we skipped rows, insert a "Carried Forward" row
+                if (hasCarriedForward && html === '') {
+                    html += `
+                        <tr style="background-color: #f8f9fa; font-style: italic;">
+                            <td>-</td>
+                            <td>-</td>
+                            <td><strong>Balance Carried Forward</strong></td>
+                            <td style="text-align: right;">-</td>
+                            <td style="text-align: right;">-</td>
+                            <td style="text-align: right; font-weight: bold;">₹${filteredStartBalance.toFixed(2)}</td>
+                        </tr>
+                    `;
+                }
+
+                const d = tx.isOpening ? '-' : new Date(tx.date).toLocaleDateString();
+                
+                totalDebit += tx.debit;
+                totalCredit += tx.credit;
+
+                html += `
+                    <tr>
+                        <td>${d}</td>
+                        <td>${tx.ref}</td>
+                        <td>${tx.particulars}</td>
+                        <td style="text-align: right; color: ${tx.debit > 0 ? '#dc3545' : 'inherit'};">${tx.debit > 0 ? '₹'+tx.debit.toFixed(2) : '-'}</td>
+                        <td style="text-align: right; color: ${tx.credit > 0 ? '#28a745' : 'inherit'};">${tx.credit > 0 ? '₹'+tx.credit.toFixed(2) : '-'}</td>
+                        <td style="text-align: right; font-weight: bold; color: ${runningBalance > 0 ? '#dc3545' : '#28a745'};">
+                            ₹${Math.abs(runningBalance).toFixed(2)} ${runningBalance > 0 ? (currentLedgerType === 'customer' ? 'Dr' : 'Cr') : (currentLedgerType === 'customer' ? 'Cr' : 'Dr')}
+                        </td>
+                    </tr>
+                `;
+            });
+
+            if (html === '') {
+                html = '<tr><td colspan="6" style="text-align: center;">No transactions found in this period.</td></tr>';
+            }
+
+            tbody.innerHTML = html;
+            
+            document.getElementById('pl-total-debit').innerText = '₹' + totalDebit.toFixed(2);
+            document.getElementById('pl-total-credit').innerText = '₹' + totalCredit.toFixed(2);
+            document.getElementById('pl-closing-balance').innerText = '₹' + Math.abs(runningBalance).toFixed(2) + ' ' + (runningBalance > 0 ? (currentLedgerType === 'customer' ? 'Dr' : 'Cr') : (currentLedgerType === 'customer' ? 'Cr' : 'Dr'));
+            document.getElementById('pl-current-balance').innerText = '₹' + Math.abs(runningBalance).toFixed(2);
+        }
+
+        // --- Ledger Payment Popup ---
+
+        function openLedgerPaymentModal() {
+            document.getElementById('lp-party-id').value = currentLedgerParty.id;
+            document.getElementById('lp-party-type').value = currentLedgerType;
+            document.getElementById('lp-party-name-display').innerText = currentLedgerParty.name;
+            
+            document.getElementById('lp-date').value = new Date().toISOString().split('T')[0];
+            document.getElementById('lp-amount').value = '';
+            document.getElementById('lp-method').value = 'cash';
+            document.getElementById('lp-reference').value = '';
+            document.getElementById('lp-notes').value = '';
+            
+            document.getElementById('ledgerPaymentModal').style.display = 'flex';
+        }
+
+        function closeLedgerPaymentModal() {
+            document.getElementById('ledgerPaymentModal').style.display = 'none';
+        }
+
+        function saveLedgerPayment() {
+            const partyId = document.getElementById('lp-party-id').value;
+            const partyType = document.getElementById('lp-party-type').value;
+            const date = document.getElementById('lp-date').value;
+            const amount = parseFloat(document.getElementById('lp-amount').value);
+            const method = document.getElementById('lp-method').value;
+            const reference = document.getElementById('lp-reference').value;
+            const notes = document.getElementById('lp-notes').value;
+
+            if (!date || isNaN(amount) || amount <= 0) {
+                showAlert('Please provide a valid date and amount.', '⚠️');
+                return;
+            }
+
+            let partyPayments = JSON.parse(localStorage.getItem('partyPayments')) || [];
+            
+            partyPayments.push({
+                id: Date.now().toString(),
+                partyId,
+                partyType,
+                date: new Date(date).toISOString(),
+                amount,
+                method,
+                reference,
+                notes
+            });
+
+            localStorage.setItem('partyPayments', JSON.stringify(partyPayments));
+            
+            closeLedgerPaymentModal();
+            showAlert('Account Payment Recorded Successfully!', '✅');
+            generatePartyLedgerData(); // Refresh the ledger view immediately
+        }
+
+        function printLedger() {
+            const content = document.getElementById('printLedgerArea').innerHTML;
+            const win = window.open('', '', 'width=800,height=600');
+            win.document.write(`
+                <html>
+                    <head>
+                        <title>Account Statement - ${currentLedgerParty.name}</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; padding: 20px; }
+                            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                            th { background-color: #f2f2f2; }
+                            .no-print { display: none !important; }
+                        </style>
+                    </head>
+                    <body>
+                        <h2 style="text-align: center;">Account Statement</h2>
+                        ${content}
+                    </body>
+                </html>
+            `);
+            win.document.close();
+            win.focus();
+            setTimeout(() => {
+                win.print();
+                win.close();
+            }, 500);
         }
 
         // Initialize Master Data on load
